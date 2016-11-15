@@ -54,8 +54,6 @@
         <module>AMW_angular</module>
         <module>AMW_rest</module>
         <module>AMW_maia_federation</module>
-        <module>AMW_testing</module>
-        <module>AMW_doc</module>
         <module>AMW_db_scripts</module>
         <module>AMW_wsauth_test</module>
     </modules>
