@@ -46,7 +46,8 @@ import static javax.persistence.CascadeType.PERSIST;
  */
 @Entity
 @Audited
-@Table(name = "TAMW_context")
+@Table(name = "TAMW_context", uniqueConstraints = {
+        @UniqueConstraint(name = "IU_CONTEXT", columnNames = {"name"})})
 @NamedQuery(name = ContextEntity.LOAD_CONTEXT_BY_NAME_QUERY_NAME, query = "select c from ContextEntity c where c.name=:name", cacheable = true)
 @AssociationOverrides({
         @AssociationOverride(name = "properties", joinTable = @JoinTable(name = "TAMW_context_prop")),
@@ -65,6 +66,7 @@ public class ContextEntity extends AbstractContext implements Serializable {
     @Getter
     @Setter
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE)
+    @org.hibernate.annotations.ForeignKey(name = "FK_M4D9672RME6C3JI7SAWH0NFMM")
     @AuditMappedBy(mappedBy = "parent")
     @OrderBy(value = "name")
     private Set<ContextEntity> children;
@@ -72,6 +74,7 @@ public class ContextEntity extends AbstractContext implements Serializable {
     @Getter
     @Setter
     @ManyToOne(cascade = {PERSIST})
+    @org.hibernate.annotations.ForeignKey(name = "FK_SOO4P4WNMVSPP6KS0LK3R6MVN")
     private ContextTypeEntity contextType;
 
     @Getter
@@ -119,7 +122,6 @@ public class ContextEntity extends AbstractContext implements Serializable {
 
     @Getter
     @Setter
-    @Column(unique = true)
     private String name;
 
     public ContextEntity() {

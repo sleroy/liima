@@ -20,47 +20,52 @@
 
 package ch.puzzle.itc.mobiliar.business.usersettings.entity;
 
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
 import ch.puzzle.itc.mobiliar.business.database.control.Constants;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
-@Table(name="TAMW_favoriteResource", uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "USER_ID", "RESOURCEGROUP_ID" }) })
+@Table(name = "TAMW_favoriteResource", uniqueConstraints = {
+        @UniqueConstraint(name = "FAV_UNIQUE", columnNames = {"resourcegroup_id", "user_id"})})
 public class FavoriteResourceEntity implements Serializable {
 
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Getter
-	@Setter
-	@TableGenerator(name = "favoriteResourceIdGen", table = Constants.GENERATORTABLE, pkColumnName = Constants.GENERATORPKCOLUMNNAME, valueColumnName = Constants.GENERATORVALUECOLUMNNAME, pkColumnValue = "favoriteResourceId")
-	@GeneratedValue(strategy = GenerationType.TABLE, generator = "favoriteResourceIdGen")
-	@Id
-	@Column(unique = true, nullable = false)
-	private Integer id;
+    @Getter
+    @Setter
+    @TableGenerator(name = "favoriteResourceIdGen", table = Constants.GENERATORTABLE, pkColumnName = Constants.GENERATORPKCOLUMNNAME, valueColumnName = Constants.GENERATORVALUECOLUMNNAME, pkColumnValue = "favoriteResourceId")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "favoriteResourceIdGen")
+    @Id
+    @Column(unique = true, nullable = false)
+    private Integer id;
 
-	@Getter
-	@Setter
-	@Column(nullable = false)
-	private boolean email;
+    @Getter
+    @Setter
+    @Column(nullable = false)
+    private boolean email;
 
-	@Getter
-	@Setter
-	@ManyToOne
-	private UserSettingsEntity user;
+    @Getter
+    @Setter
+    @ManyToOne
+    @org.hibernate.annotations.ForeignKey(name = "FK_BP9VL4DQWBSN2ECTPJ4DEF8V7")
+    private UserSettingsEntity user;
 
-	@Getter
-	@Setter
-	@ManyToOne
-	private ResourceGroupEntity resourceGroup;
+    @Getter
+    @Setter
+    @ManyToOne
+    @JoinColumn
+    @org.hibernate.annotations.ForeignKey(name = "FAVGROUP_FK")
+    private ResourceGroupEntity resourceGroup;
 
-	@Getter
-	@Version
-	private long v;
+    @Getter
+    @Version
+    private long v;
 
 }
