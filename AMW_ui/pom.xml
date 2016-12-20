@@ -46,7 +46,6 @@
                 <configuration>
                     <workingDirectory>ui</workingDirectory>
                 </configuration>
-
                 <executions>
                     <execution>
                         <id>install node and npm</id>
@@ -78,7 +77,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
         </plugins>
     </build>
