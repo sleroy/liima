@@ -1,1 +1,322 @@
-<link href="assets/css/main.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="AMW">
+    <meta name="author" content="Puzzle ITC GmbH">
+
+    <title>Dashboard Template for Bootstrap</title>
+      <!-- highlightjs for code highlighting. not needed for production -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+    <!-- Bootstrap core CSS -->
+    <link href="../dist/assets/css/dev.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">AMW</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Apps</a></li>
+            <li><a href="#">Servers</a></li>
+            <li><a href="#">Resources</a></li>
+            <li><a href="#">Deploy</a></li>
+            <li><a href="#">Shakedown Test</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Logout admin_role</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox"> Show my favorites only
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+    </nav>
+    <div class="row page-header">
+      <div class="col-md-12">
+                  <h1>Komponenten-Bibliothek</h1>
+      </div>
+    </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">Export <span class="caret"></span></a>
+        			<ul class="nav collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
+        				<li><a href="#">Link 2.1</a></li>
+        				<li><a href="#">Link 2.2</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h2 class="sub-header">Resources Übersicht</h2>
+          <div class="panel panel-default">
+          <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">Demo Resource</h3>
+            <div class="btn-group  pull-right">
+              <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New Resource
+              </button>
+              <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> Edit Resource Type
+              </button>
+              <button type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete Resource
+              </button>
+            </div>
+          </div>
+          <!-- Table -->
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th class="col-md-8">Resource Name</th>
+                <th class="col-md-1">Release</th>
+                <th class="col-md-1">Favorite</th>
+                <th class="col-md-1">Edit</th>
+                <th class="col-md-1">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Demo Resource</td>
+                <td><select class="form-control input-sm">
+                  <option>1</option>
+                  <option>2</option>
+                </select>
+                </td>
+                <td><label class="checkbox-inline"> &nbsp;
+  <input type="checkbox" id="inlineCheckbox1" value="option1">
+</label></td>
+                <td><a href="#">Edit</a></td>
+                <td><a href="#">Delete</a></td>
+              </tr>
+              <tr>
+                <td>Demo Resource</td>
+                <td><select class="form-control input-sm">
+                  <option>1</option>
+                  <option>2</option>
+                </select>
+                </td>
+                <td><label class="checkbox-inline"> &nbsp;
+  <input type="checkbox" id="inlineCheckbox1" value="option1">
+</label></td>
+                <td><a href="#">Edit</a></td>
+                <td><a href="#">Delete</a></td>
+              </tr>
+          </table>
+        </div>
+        <h3>ResourceEditScreen ohne Related Resources (ApplicationServer Details, AMW_web/pages/editResourceView.xhtml?id=251761&amp;ctx=1)</h3>
+        <pre><code class="html">
+
+        </code></pre>
+        <h3>Inputfelder (checkbox, radio, textarea, Tagtextbox, ...)</h3>
+        <h4>Checkbox</h4>
+        <pre>  &lt;div class=&quot;checkbox&quot;&gt;
+    &lt;label&gt;
+      &lt;input type=&quot;checkbox&quot;&gt; Check me out
+    &lt;/label&gt;
+  &lt;/div&gt;</pre>
+  <div class="checkbox">
+  <label>
+    <input type="checkbox"> Check me out
+  </label>
+</div>
+<h4>Radio</h4>
+<pre><code class="html">&lt;div class=&quot;radio&quot;&gt;
+  &lt;label&gt;
+    &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios1&quot; value=&quot;option1&quot; checked&gt;
+    Option one is this and that&amp;mdash;be sure to include why it&apos;s great
+  &lt;/label&gt;
+&lt;/div&gt;
+&lt;div class=&quot;radio&quot;&gt;
+  &lt;label&gt;
+    &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios2&quot; value=&quot;option2&quot;&gt;
+    Option two can be something else and selecting it will deselect option one
+  &lt;/label&gt;
+&lt;/div&gt;</code></pre>
+<div class="radio">
+  <label>
+    <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+    Option one is this and that&mdash;be sure to include why it's great
+  </label>
+</div>
+<div class="radio">
+  <label>
+    <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+    Option two can be something else and selecting it will deselect option one
+  </label>
+</div>
+<h4>Textarea</h4>
+Form control which supports multiple lines of text. Change rows attribute as necessary.
+<pre>&lt;textarea class=&quot;form-control&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;</pre>
+<textarea class="form-control" rows="3"></textarea>
+<h4>Tagtextbox</h4>
+
+        <h3>Dropdown</h3>
+        <pre><code class="html">&lt;div class=&quot;dropdown&quot;&gt;
+  &lt;button class=&quot;btn btn-default dropdown-toggle&quot; type=&quot;button&quot; id=&quot;dropdownMenu1&quot; data-toggle=&quot;dropdown&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;true&quot;&gt;
+    Dropdown
+    &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;ul class=&quot;dropdown-menu&quot; aria-labelledby=&quot;dropdownMenu1&quot;&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Action&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Another action&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+    &lt;li role=&quot;separator&quot; class=&quot;divider&quot;&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+        <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+        <h3>PopUp (Alert?)</h3>
+        <pre><code class="html">
+          &lt;div class=&quot;alert alert-success&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
+  &lt;div class=&quot;alert alert-info&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
+  &lt;div class=&quot;alert alert-warning&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
+  &lt;div class=&quot;alert alert-danger&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
+        </code></pre>
+        <div class="alert alert-success" role="alert">Success</div>
+<div class="alert alert-info" role="alert">Info</div>
+<div class="alert alert-warning" role="alert">Warning</div>
+<div class="alert alert-danger" role="alert">Danger</div>
+        <h4>Dismissible alerts</h4>
+        <pre><code class="html">
+          &lt;div class=&quot;alert alert-warning alert-dismissible&quot; role=&quot;alert&quot;&gt;
+        &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+        &lt;strong&gt;Warning!&lt;/strong&gt; Better check yourself, you&apos;re not looking too good.
+        &lt;/div&gt;
+        </code></pre>
+        <div class="alert alert-warning alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <strong>Warning!</strong> Better check yourself, you're not looking too good.
+</div>
+        <h3>Tooltip</h3>
+        <pre><code class="html">
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;left&quot; title=&quot;Tooltip on left&quot;&gt;Tooltip on left&lt;/button&gt;
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;top&quot; title=&quot;Tooltip on top&quot;&gt;Tooltip on top&lt;/button&gt;
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;bottom&quot; title=&quot;Tooltip on bottom&quot;&gt;Tooltip on bottom&lt;/button&gt;
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;right&quot; title=&quot;Tooltip on right&quot;&gt;Tooltip on right&lt;/button&gt;
+        </code></pre>
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="Tooltip on top">Tooltip on top</button>
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">Tooltip on bottom</button>
+        <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
+        <!-- <script>jQuery( document ).ready(function () {
+  jQuery('[data-toggle="tooltip"]').tooltip();
+})</script> -->
+        <h3>Modaldialog</h3>
+        <!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+<br>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div><br>
+        <pre><code class="html">
+  &lt;!-- Button trigger modal --&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-primary btn-lg&quot; data-toggle=&quot;modal&quot; data-target=&quot;#myModal&quot;&gt;
+    Launch demo modal
+  &lt;/button&gt;
+
+  &lt;!-- Modal --&gt;
+  &lt;div class=&quot;modal fade&quot; id=&quot;myModal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;myModalLabel&quot;&gt;
+    &lt;div class=&quot;modal-dialog&quot; role=&quot;document&quot;&gt;
+      &lt;div class=&quot;modal-content&quot;&gt;
+        &lt;div class=&quot;modal-header&quot;&gt;
+          &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+          &lt;h4 class=&quot;modal-title&quot; id=&quot;myModalLabel&quot;&gt;Modal title&lt;/h4&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;modal-body&quot;&gt;
+          ...
+        &lt;/div&gt;
+        &lt;div class=&quot;modal-footer&quot;&gt;
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-dismiss=&quot;modal&quot;&gt;Close&lt;/button&gt;
+          &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Save changes&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+        </code></pre>
+        <h3>ResourceNavigation (Resources Screen, navigation links)</h3>
+        <pre><code class="html">
+
+        </code></pre>
+        <h3>Subnavigation im ResoucenScreen</h3>
+        <pre><code class="html">
+
+        </code></pre>
+        <h3>Notification(Error, Info)</h3>
+
+      <h3>Deploymentview filter</h3>
+        <h3>RelatedResources Bereich tiefste Prio, da wir allenfalls diesen Screen eh überarbeiten müssen.</h3>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../dist/assets/js/main.min.js"></script>
+  </body>
+</html>
