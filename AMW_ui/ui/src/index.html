@@ -64,173 +64,51 @@
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <ul class="nav nav-sidebar">
-          <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-          <li><a href="#">Reports</a></li>
-          <li><a href="#">Analytics</a></li>
-          <li><a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">Export <span class="caret"></span></a>
-            <ul class="nav collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
-              <li><a href="#">Link 2.1</a></li>
-              <li><a href="#">Link 2.2</a></li>
-            </ul>
-          </li>
+          <li class="active"><a href="index.html">Bibliothek <span class="sr-only">(current)</span></a></li>
+          <li><a href="resources.html">Resources Übersicht</a></li>
+          <li><a href="edit-resource.html">Resources Edit</a></li>
         </ul>
         <ul class="nav nav-sidebar">
           <li><a href="">Nav item again</a></li>
-          <li><a href="">One more nav</a></li>
-          <li><a href="">Another nav item</a></li>
+          <li><a href="">One more nav</a></li>          <li><a href="#" id="btn-1" data-toggle="collapse" data-target="#submenu1" aria-expanded="false">Dropdown Nav Item <span class="caret"></span></a>
+                      <ul class="nav collapse" id="submenu1" role="menu" aria-labelledby="btn-1">
+                        <li><a href="#">Link 2.1</a></li>
+                        <li><a href="#">Link 2.2</a></li>
+                      </ul>
+                    </li>
         </ul>
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h2 class="sub-header">Resources Übersicht</h2>
-        <div class="panel panel-default">
-          <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">Demo Resource</h3>
-            <div class="btn-group  pull-right">
-              <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal">
-                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New Resource
-              </button>
-              <button type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> Edit Resource Type
-              </button>
-              <button type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete Resource
-              </button>
-            </div>
-          </div>
-          <!-- Table -->
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th class="col-md-8">Resource Name</th>
-                <th class="col-md-1">Release</th>
-                <th class="col-md-1">Favorite</th>
-                <th class="col-md-1">Edit</th>
-                <th class="col-md-1">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><a href="#">Demo Resource</a></td>
-                <td><select class="form-control input-sm">
-                  <option>1</option>
-                  <option>2</option>
-                </select>
-              </td>
-              <td><label class="checkbox-inline"> &nbsp;
-                <input type="checkbox" id="inlineCheckbox1" value="option1">
-              </label></td>
-              <td><a href="#">Edit</a></td>
-              <td><a href="#">Delete</a></td>
-            </tr>
-            <tr>
-              <td><a href="#">Demo Resource</a></td>
-              <td><select class="form-control input-sm">
-                <option>1</option>
-                <option>2</option>
-              </select>
-            </td>
-            <td><label class="checkbox-inline"> &nbsp;
-              <input type="checkbox" id="inlineCheckbox1" value="option1">
-            </label></td>
-            <td><a href="#">Edit</a></td>
-            <td><a href="#">Delete</a></td>
-          </tr>
-        </table>
-      </div>
-      <!-- Modal New Resource -->
-      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">Create New instance for xx</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label for="exampleInput1" class="col-sm-3">Resource Name</label>
-                   <div class="col-sm-9">
-                    <input type="email" class="form-control" id="exampleInput1" placeholder="Name">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="exampleSelect1" class="col-sm-3">Release</label>
-                   <div class="col-sm-9">
-                  <select id="exampleSelect1" class="form-control input-sm">
-                    <option>future</option>
-                    <option>10.2</option>
-                    <option>testing</option>
-                  </select>
-                    </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Create</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <h3>ResourceEditScreen ohne Related Resources (ApplicationServer Details)</h3>
-      <div class="row">
-        <div class="col-md-8">
-          <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-              <h3 class="panel-title pull-left">Properties</h3>
-              <button type="button" class="btn btn-default pull-right">
-                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add new instance Property
-                Properties
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-              <h3 class="panel-title pull-left">Templates</h3>
-              <button type="button" class="btn btn-default pull-right">
-                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New Template
-              </button>
-            </div>
-          </div>
-          <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-              <h3 class="panel-title pull-left">Functions</h3>
-              <button type="button" class="btn btn-default pull-right">
-                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> New Function
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <h3>Inputfelder (checkbox, radio, textarea, Tagtextbox, ...)</h3>
       <h4>Checkbox</h4>
-      <pre>  &lt;div class=&quot;checkbox&quot;&gt;
-        &lt;label&gt;
-        &lt;input type=&quot;checkbox&quot;&gt; Check me out
-        &lt;/label&gt;
-        &lt;/div&gt;</pre>
+      <pre>
+&lt;div class=&quot;checkbox&quot;&gt;
+&lt;label&gt;
+&lt;input type=&quot;checkbox&quot;&gt; Check me out
+&lt;/label&gt;
+&lt;/div&gt;
+      </pre>
         <div class="checkbox">
           <label>
             <input type="checkbox"> Check me out
           </label>
         </div>
         <h4>Radio</h4>
-        <pre><code class="html">&lt;div class=&quot;radio&quot;&gt;
-          &lt;label&gt;
-          &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios1&quot; value=&quot;option1&quot; checked&gt;
-          Option one is this and that&amp;mdash;be sure to include why it&apos;s great
-          &lt;/label&gt;
-          &lt;/div&gt;
-          &lt;div class=&quot;radio&quot;&gt;
-          &lt;label&gt;
-          &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios2&quot; value=&quot;option2&quot;&gt;
-          Option two can be something else and selecting it will deselect option one
-          &lt;/label&gt;
-          &lt;/div&gt;</code></pre>
+        <pre><code class="html">
+&lt;div class=&quot;radio&quot;&gt;
+&lt;label&gt;
+&lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios1&quot; value=&quot;option1&quot; checked&gt;
+Option one is this and that&amp;mdash;be sure to include why it&apos;s great
+&lt;/label&gt;
+&lt;/div&gt;
+&lt;div class=&quot;radio&quot;&gt;
+&lt;label&gt;
+&lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; id=&quot;optionsRadios2&quot; value=&quot;option2&quot;&gt;
+Option two can be something else and selecting it will deselect option one
+&lt;/label&gt;
+&lt;/div&gt;
+        </code></pre>
           <div class="radio">
             <label>
               <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
@@ -245,24 +123,32 @@
           </div>
           <h4>Textarea</h4>
           Form control which supports multiple lines of text. Change rows attribute as necessary.
-          <pre>&lt;textarea class=&quot;form-control&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;</pre>
+          <pre>
+&lt;textarea class=&quot;form-control&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;
+</pre>
           <textarea class="form-control" rows="3"></textarea>
           <h4>Tagtextbox</h4>
-
+          <pre><code class="html">
+&lt;input type=&quot;text&quot; class=&quot;form-control&quot; placeholder=&quot;Type to add some tags&quot; data-role=&quot;tagsinput&quot;&gt;
+          </code></pre>
+          <input type="text" class="form-control" placeholder="Type to add some tags" data-role="tagsinput"><br>
+          <br>(Using <a href="https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/examples/">https://bootstrap-tagsinput.github.io/bootstrap-tagsinput/examples/</a>)
           <h3>Dropdown</h3>
-          <pre><code class="html">&lt;div class=&quot;dropdown&quot;&gt;
-            &lt;button class=&quot;btn btn-default dropdown-toggle&quot; type=&quot;button&quot; id=&quot;dropdownMenu1&quot; data-toggle=&quot;dropdown&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;true&quot;&gt;
-            Dropdown
-            &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;
-            &lt;/button&gt;
-            &lt;ul class=&quot;dropdown-menu&quot; aria-labelledby=&quot;dropdownMenu1&quot;&gt;
-            &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Action&lt;/a&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Another action&lt;/a&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Something else here&lt;/a&gt;&lt;/li&gt;
-            &lt;li role=&quot;separator&quot; class=&quot;divider&quot;&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Separated link&lt;/a&gt;&lt;/li&gt;
-            &lt;/ul&gt;
-            &lt;/div&gt;</code></pre>
+          <pre><code class="html">
+&lt;div class=&quot;dropdown&quot;&gt;
+&lt;button class=&quot;btn btn-default dropdown-toggle&quot; type=&quot;button&quot; id=&quot;dropdownMenu1&quot; data-toggle=&quot;dropdown&quot; aria-haspopup=&quot;true&quot; aria-expanded=&quot;true&quot;&gt;
+Dropdown
+&lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;
+&lt;/button&gt;
+&lt;ul class=&quot;dropdown-menu&quot; aria-labelledby=&quot;dropdownMenu1&quot;&gt;
+&lt;li&gt;&lt;a href=&quot;#&quot;&gt;Action&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#&quot;&gt;Another action&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#&quot;&gt;Something else here&lt;/a&gt;&lt;/li&gt;
+&lt;li role=&quot;separator&quot; class=&quot;divider&quot;&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;#&quot;&gt;Separated link&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+          </code></pre>
             <div class="dropdown">
               <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 Dropdown
@@ -278,21 +164,21 @@
             </div>
             <h3>PopUp (Alert?)</h3>
             <pre><code class="html">
-              &lt;div class=&quot;alert alert-success&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
-              &lt;div class=&quot;alert alert-info&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
-              &lt;div class=&quot;alert alert-warning&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
-              &lt;div class=&quot;alert alert-danger&quot; role=&quot;alert&quot;&gt;...&lt;/div&gt;
+  &lt;div class=&quot;alert alert-success&quot; role=&quot;alert&quot;&gt;Success&lt;/div&gt;
+  &lt;div class=&quot;alert alert-info&quot; role=&quot;alert&quot;&gt;Info&lt;/div&gt;
+  &lt;div class=&quot;alert alert-warning&quot; role=&quot;alert&quot;&gt;Warning&lt;/div&gt;
+  &lt;div class=&quot;alert alert-danger&quot; role=&quot;alert&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-exclamation-sign&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt; Danger&lt;/div&gt;
             </code></pre>
             <div class="alert alert-success" role="alert">Success</div>
             <div class="alert alert-info" role="alert">Info</div>
             <div class="alert alert-warning" role="alert">Warning</div>
-            <div class="alert alert-danger" role="alert">Danger</div>
+            <div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Danger</div>
             <h4>Dismissible alerts</h4>
             <pre><code class="html">
-              &lt;div class=&quot;alert alert-warning alert-dismissible&quot; role=&quot;alert&quot;&gt;
-              &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
-              &lt;strong&gt;Warning!&lt;/strong&gt; Better check yourself, you&apos;re not looking too good.
-              &lt;/div&gt;
+  &lt;div class=&quot;alert alert-warning alert-dismissible&quot; role=&quot;alert&quot;&gt;
+  &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+  &lt;strong&gt;Warning!&lt;/strong&gt; Better check yourself, you&apos;re not looking too good.
+  &lt;/div&gt;
             </code></pre>
             <div class="alert alert-warning alert-dismissible" role="alert">
               <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -300,62 +186,89 @@
             </div>
             <h3>Tooltip</h3>
             <pre><code class="html">
-              &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;left&quot; title=&quot;Tooltip on left&quot;&gt;Tooltip on left&lt;/button&gt;
-              &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;top&quot; title=&quot;Tooltip on top&quot;&gt;Tooltip on top&lt;/button&gt;
-              &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;bottom&quot; title=&quot;Tooltip on bottom&quot;&gt;Tooltip on bottom&lt;/button&gt;
-              &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;right&quot; title=&quot;Tooltip on right&quot;&gt;Tooltip on right&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;left&quot; title=&quot;Tooltip on left&quot;&gt;Tooltip on left&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;top&quot; title=&quot;Tooltip on top&quot;&gt;Tooltip on top&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;bottom&quot; title=&quot;Tooltip on bottom&quot;&gt;Tooltip on bottom&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-toggle=&quot;tooltip&quot; data-placement=&quot;right&quot; title=&quot;Tooltip on right&quot;&gt;Tooltip on right&lt;/button&gt;
             </code></pre>
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left" title="Tooltip on left">Tooltip on left</button>
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="Tooltip on top">Tooltip on top</button>
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom">Tooltip on bottom</button>
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
-            <!-- <script>jQuery( document ).ready(function () {
-            jQuery('[data-toggle="tooltip"]').tooltip();
-          })</script> -->
+            <div class="row">
+              <div class="col-sm-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="Inputfield">
+                  <span class="input-group-btn">
+                    <a tabindex="0" id="popover-info" class="btn btn-default" role="button" data-toggle="popover" data-container="body" data-placement="bottom" data-trigger="hover" title="Hello" data-content="And here's some amazing content. It's very engaging. Right?"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>
+                  </span>
+                </div>
+              </div>
+            </div>
           <h3>Modaldialog</h3>
+          <!-- Modal New Resource -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="myModalLabel">Create New instance for xx</h4>
+                </div>
+                <div class="modal-body">
+                  <form class="form-horizontal">
+                    <div class="form-group">
+                      <label for="exampleInput1" class="col-sm-3">Resource Name</label>
+                      <div class="col-sm-9">
+                        <input type="email" class="form-control" id="exampleInput1" placeholder="Name">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleSelect1" class="col-sm-3">Release</label>
+                      <div class="col-sm-9">
+                        <select id="exampleSelect1" class="form-control input-sm">
+                          <option>future</option>
+                          <option>10.2</option>
+                          <option>testing</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Create</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <pre><code class="html">
+  &lt;!-- Button trigger modal --&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-primary btn-lg&quot; data-toggle=&quot;modal&quot; data-target=&quot;#myModal&quot;&gt;
+  Launch demo modal
+  &lt;/button&gt;
+
+  &lt;!-- Modal --&gt;
+  &lt;div class=&quot;modal fade&quot; id=&quot;myModal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;myModalLabel&quot;&gt;
+  &lt;div class=&quot;modal-dialog&quot; role=&quot;document&quot;&gt;
+  &lt;div class=&quot;modal-content&quot;&gt;
+  &lt;div class=&quot;modal-header&quot;&gt;
+  &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
+  &lt;h4 class=&quot;modal-title&quot; id=&quot;myModalLabel&quot;&gt;Modal title&lt;/h4&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;modal-body&quot;&gt;
+  ...
+  &lt;/div&gt;
+  &lt;div class=&quot;modal-footer&quot;&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-dismiss=&quot;modal&quot;&gt;Close&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Save changes&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;/div&gt;
+          </code></pre>
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
             Launch demo modal
           </button>
           <br>
           <br>
-          <pre><code class="html">
-            &lt;!-- Button trigger modal --&gt;
-            &lt;button type=&quot;button&quot; class=&quot;btn btn-primary btn-lg&quot; data-toggle=&quot;modal&quot; data-target=&quot;#myModal&quot;&gt;
-            Launch demo modal
-            &lt;/button&gt;
-
-            &lt;!-- Modal --&gt;
-            &lt;div class=&quot;modal fade&quot; id=&quot;myModal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;myModalLabel&quot;&gt;
-            &lt;div class=&quot;modal-dialog&quot; role=&quot;document&quot;&gt;
-            &lt;div class=&quot;modal-content&quot;&gt;
-            &lt;div class=&quot;modal-header&quot;&gt;
-            &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;
-            &lt;h4 class=&quot;modal-title&quot; id=&quot;myModalLabel&quot;&gt;Modal title&lt;/h4&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;modal-body&quot;&gt;
-            ...
-            &lt;/div&gt;
-            &lt;div class=&quot;modal-footer&quot;&gt;
-            &lt;button type=&quot;button&quot; class=&quot;btn btn-default&quot; data-dismiss=&quot;modal&quot;&gt;Close&lt;/button&gt;
-            &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Save changes&lt;/button&gt;
-            &lt;/div&gt;
-            &lt;/div&gt;
-            &lt;/div&gt;
-            &lt;/div&gt;
-          </code></pre>
-          <h3>ResourceNavigation (Resources Screen, navigation links)</h3>
-          <pre><code class="html">
-
-          </code></pre>
-          <h3>Subnavigation im ResoucenScreen</h3>
-          <pre><code class="html">
-
-          </code></pre>
-          <h3>Notification(Error, Info)</h3>
-
-          <h3>Deploymentview filter</h3>
-          <h3>RelatedResources Bereich tiefste Prio, da wir allenfalls diesen Screen eh überarbeiten müssen.</h3>
 
         </div>
       </div>

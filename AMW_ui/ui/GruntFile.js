@@ -46,7 +46,7 @@ module.exports = function (grunt) {
             },
             my_target:{
                 files: {
-                    'dist/assets/js/main.min.js' : ['node_modules/bootstrap-sass/assets/javascripts/bootstrap.js','src/js/*.js']
+                    'dist/assets/js/main.min.js' : ['node_modules/bootstrap-sass/assets/javascripts/bootstrap.js','src/js/*.js','node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.js']
                 }
             }
         },
