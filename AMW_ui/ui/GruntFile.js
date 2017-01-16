@@ -15,8 +15,13 @@ module.exports = function (grunt) {
                 cwd: 'src',
                 src: '*',
                 dest: 'dist/',
-                filter: 'isFile'
-            },
+                filter: 'isFile'},
+            fonts: {
+                expand: true,
+                cwd: 'node_modules/bootstrap-sass/assets/fonts/bootstrap',
+                src: '*',
+                dest: 'dist/assets/fonts',
+                filter: 'isFile'},
         },
         // define sass task
         sass: {
@@ -102,6 +107,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-asset-cachebuster');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.registerTask('default', ['clean:pre', 'copy', 'sass:prod', 'autoprefixer:prod', 'uglify', 'asset_cachebuster', 'clean:post']);
+    grunt.registerTask('default', ['clean:pre', 'copy:main', 'copy:fonts', 'sass:prod', 'autoprefixer:prod', 'uglify', 'asset_cachebuster', 'clean:post']);
     grunt.registerTask('dev', ['clean:pre', 'copy', 'sass:dev', 'autoprefixer:dev']);
 };
