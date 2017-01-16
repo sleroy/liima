@@ -6,7 +6,7 @@ module.exports = function (grunt) {
         // define clean task
         clean: {
             pre: ['dist/'],
-            post: ['dist/assets/css/prod.css']
+            post: ['dist/assets/css/prod.css', 'dist/assets/css/dev.css']
         },
         // define copy task
         copy: {
@@ -39,14 +39,14 @@ module.exports = function (grunt) {
                 }
             }
         },
-        uglify:{
+        uglify: {
             options: {
                 manage: false,
                 preserveComments: 'all' //preserve all comments on JS files
             },
-            my_target:{
+            my_target: {
                 files: {
-                    'dist/assets/js/main.min.js' : ['node_modules/bootstrap-sass/assets/javascripts/bootstrap.js','src/js/*.js','node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.js']
+                    'dist/assets/js/main.min.js': ['node_modules/bootstrap-sass/assets/javascripts/bootstrap.js', 'src/js/*.js', 'node_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.js']
                 }
             }
         },
@@ -69,13 +69,13 @@ module.exports = function (grunt) {
         },
         // define watch task
         watch: {
-          css: {
-            files: 'src/scss/*.scss',
-            tasks: ['sass:dev'],
-            options: {
-              livereload: true,
+            css: {
+                files: 'src/scss/*.scss',
+                tasks: ['sass:dev'],
+                options: {
+                    livereload: true,
+                },
             },
-          },
         },
         // define chache buster task
         asset_cachebuster: {
@@ -85,7 +85,9 @@ module.exports = function (grunt) {
             build: {
                 files: {
                     'dist/assets/css/main.css': ['dist/assets/css/prod.css'],
-                    'dist/index.html': ['src/index.html']
+                    'dist/index.html': ['src/index.html'],
+                    'dist/edit-resource.html': ['src/edit-resource.html'],
+                    'dist/resources.html': ['src/resources.html']
                 }
             }
         }
@@ -100,7 +102,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-asset-cachebuster');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.registerTask('default', ['clean:pre', 'copy', 'sass:prod', 'autoprefixer:prod', 'asset_cachebuster', 'clean:post']);
+    grunt.registerTask('default', ['clean:pre', 'copy', 'sass:prod', 'autoprefixer:prod', 'uglify', 'asset_cachebuster', 'clean:post']);
     grunt.registerTask('dev', ['clean:pre', 'copy', 'sass:dev', 'autoprefixer:dev']);
-    grunt.registerTask('default', ['uglify','sass']);
 };
