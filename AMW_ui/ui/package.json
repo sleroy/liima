@@ -22,7 +22,8 @@
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-sass": "^2.0.0",
     "bootstrap-sass": "3.3.7",
-    "bootstrap-tagsinput": "0.7.1"
+    "bootstrap-tagsinput": "0.7.1",
+    "bootstrap-datepicker": "1.6.4"
   },
   "description": ""
 }
