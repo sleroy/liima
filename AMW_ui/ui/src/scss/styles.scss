@@ -19,10 +19,6 @@ body {
 /*
  * Global add-ons
  */
-
-
-
-
  .page-header {
    margin: 0;
    padding-bottom: 0;
@@ -46,6 +42,10 @@ body {
 
 .dropdown-menu .checkbox {
   padding-left: 20px;
+}
+
+.environments-title {
+  margin-bottom: 0;
 }
 
 /*
@@ -89,7 +89,6 @@ body {
     border-right: 1px solid #eee;
   }
 }
-
 
 .nav-sidebar {
   margin-right: -21px; /* 20px padding + 1px border */

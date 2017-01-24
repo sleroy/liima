@@ -74,12 +74,16 @@ module.exports = function (grunt) {
         },
         // define watch task
         watch: {
+           options: {
+              livereload: true,
+            },
             css: {
                 files: 'src/scss/*.scss',
                 tasks: ['sass:dev'],
-                options: {
-                    livereload: true,
-                },
+            },
+            src: {
+              files: ['src/*'],
+              tasks: ['default'],
             },
         },
         // define chache buster task
