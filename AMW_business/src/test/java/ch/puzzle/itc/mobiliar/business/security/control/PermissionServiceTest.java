@@ -22,6 +22,7 @@ package ch.puzzle.itc.mobiliar.business.security.control;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.SessionContext;
 import javax.persistence.EntityManager;
@@ -37,11 +38,11 @@ import ch.puzzle.itc.mobiliar.business.security.entity.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
 
-import static java.util.Collections.EMPTY_LIST;
 import static org.mockito.Mockito.*;
 
 
@@ -53,7 +54,6 @@ public class PermissionServiceTest {
 	private static final String VIEWER = "viewer";
 	private static final String SERVER_ADMIN = "server_admin";
 	private static final String SHAKEDOWN_ADMIN = "shakedown_admin";
-	private static final String TEST_DEPLOYER = "test_deployer";
 	private static final String ROLE_NOT_DEPLOY = "role_not_deploy";
 	
 	private PermissionService permissionService;
@@ -79,7 +79,6 @@ public class PermissionServiceTest {
 		permissionRepository = Mockito.mock(PermissionRepository.class);
 		permissionService.permissionRepository = permissionRepository;
 		// reset the static caches to avoid side effects
-		permissionService.deployableRolesWithRestrictions = null;
 		permissionService.rolesWithRestrictions = null;
 		permissionService.userRestrictions = null;
 
@@ -559,7 +558,7 @@ public class PermissionServiceTest {
 		RestrictionEntity res = new RestrictionEntity();
 		res.setAction(Action.ALL);
 		myRoles.put(SHAKEDOWN_ADMIN, Arrays.asList(new RestrictionDTOBuilder().mockRestrictionDTO(Permission.SHAKEDOWN_TEST_MODE, res)));
-        permissionService.rolesWithRestrictions = myRoles;
+		permissionService.rolesWithRestrictions = myRoles;
 
         // when
         boolean result = permissionService.hasPermissionToAddResourceTemplate(as, true);
@@ -896,40 +895,26 @@ public class PermissionServiceTest {
 	@Test
 	public void shouldOnlyReloadWhenNeeded() {
 		// given
-		when(permissionService.permissionRepository.isReloadRolesAndPermissionsList()).thenReturn(false);
-		permissionService.rolesWithRestrictions = new HashMap<>();
+		PermissionService psMock = Mockito.mock(PermissionService.class);
+		psMock.rolesWithRestrictions = new HashMap<>();
 
 		// when
-		permissionService.getPermissions();
+		psMock.getRolesWithRestrictions();
 
 		// then
-		verify(permissionService.permissionRepository, never()).getRolesWithRestrictions();
+		verify(psMock, never()).reloadRolesWithRestrictionsList();
 	}
 
 	@Test
 	public void shouldObtainRolesWithRestrictions() {
 		// given
-		when(permissionService.permissionRepository.isReloadRolesAndPermissionsList()).thenReturn(true);
 		when(permissionService.permissionRepository.getRolesWithRestrictions()).thenReturn(null);
 
 		// when
-		permissionService.getPermissions();
+		permissionService.getRolesWithRestrictions();
 
 		// then
 		verify(permissionService.permissionRepository, times(1)).getRolesWithRestrictions();
-	}
-
-	@Test
-	public void shouldObtainDeployableRolesOnGetDeployableRolesWhenNeeded() {
-		// given
-		when(permissionService.permissionRepository.isReloadDeployableRoleList()).thenReturn(true);
-		when(permissionService.permissionRepository.getDeployableRoles()).thenReturn(EMPTY_LIST);
-
-		// when
-		permissionService.getDeployableRoles();
-
-		// then
-		verify(permissionService.permissionRepository, times(1)).getDeployableRoles();
 	}
 
 	@Test

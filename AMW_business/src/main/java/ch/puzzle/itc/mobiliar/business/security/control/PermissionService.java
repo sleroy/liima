@@ -21,7 +21,6 @@
 package ch.puzzle.itc.mobiliar.business.security.control;
 
 import ch.puzzle.itc.mobiliar.business.deploy.entity.DeploymentEntity;
-import ch.puzzle.itc.mobiliar.business.deploy.entity.DeploymentState;
 import ch.puzzle.itc.mobiliar.business.environment.entity.ContextEntity;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
@@ -31,6 +30,7 @@ import ch.puzzle.itc.mobiliar.common.exception.NotAuthorizedException;
 import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
 import org.apache.commons.lang.StringUtils;
 
+import javax.ejb.Schedule;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -54,72 +54,36 @@ public class PermissionService implements Serializable {
     @Inject
     SessionContext sessionContext;
 
-    // map containing only Roles with Restrictions which have the DEPLOYMENT-Permission (non legacy)
-    static Map<String, List<RestrictionDTO>> deployableRolesWithRestrictions;
     // map containing Roles with Restrictions (legacy & non legacy)
     static Map<String, List<RestrictionDTO>> rolesWithRestrictions;
     // map containing UserRestrictions with Restrictions (non legacy)
-    static Map<String, List<RestrictionEntity>> userRestrictions;
+    static Map<String, List<RestrictionEntity>> userRestrictions = new ConcurrentHashMap<>();
 
-    Map<String, List<RestrictionDTO>> getDeployableRoles() {
-        boolean isReload = permissionRepository.isReloadDeployableRoleList();
-        if (deployableRolesWithRestrictions == null || isReload) {
-            Map<String, List<RestrictionDTO>> tmpDeployableRolesWithRestrictions = new HashMap<>();
-            for (RoleEntity role : permissionRepository.getDeployableRoles()) {
-                addPermission(tmpDeployableRolesWithRestrictions, role);
-            }
-            deployableRolesWithRestrictions = Collections.unmodifiableMap(tmpDeployableRolesWithRestrictions);
-            if (isReload) {
-                permissionRepository.setReloadDeployableRoleList(false);
-            }
-        }
-        return deployableRolesWithRestrictions;
-    }
+    @Schedule(hour = "*", minute = "*/20", persistent = false)
+	public void reloadRestrctionCache() {
+		this.reloadRolesWithRestrictionsList();
+		this.resetUserRestrictionList();
+	}
 
     /**
      * Checks if the caller is allowed to see Deployments
      */
     public boolean hasPermissionToSeeDeployment() {
-        for (Map.Entry<String, List<RestrictionDTO>> entry : getDeployableRoles().entrySet()) {
-            if (sessionContext.isCallerInRole(entry.getKey())) {
-                return true;
-            }
-        }
-        return hasUserRestriction(Permission.DEPLOYMENT.name(), null, null, null, null);
+        return hasPermission(Permission.DEPLOYMENT, null, Action.READ, null, null);
     }
 
     /**
      * Checks if the caller is allowed to create (re-)Deployments
      */
     public boolean hasPermissionToCreateDeployment() {
-        for (Map.Entry<String, List<RestrictionDTO>> entry : getDeployableRoles().entrySet()) {
-            if (sessionContext.isCallerInRole(entry.getKey())) {
-                for (RestrictionDTO restrictionDTO : entry.getValue()) {
-                    if (restrictionDTO.getRestriction().getAction().equals(Action.CREATE)
-                            || restrictionDTO.getRestriction().getAction().equals(Action.ALL)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return hasUserRestriction(Permission.DEPLOYMENT.name(), null, Action.CREATE, null, null);
+        return hasPermission(Permission.DEPLOYMENT, null, Action.CREATE, null, null);
     }
 
     /**
      * Checks if the caller is allowed to edit Deployments
      */
     public boolean hasPermissionToEditDeployment() {
-        for (Map.Entry<String, List<RestrictionDTO>> entry : getDeployableRoles().entrySet()) {
-            if (sessionContext.isCallerInRole(entry.getKey())) {
-                for (RestrictionDTO restrictionDTO : entry.getValue()) {
-                    if (restrictionDTO.getRestriction().getAction().equals(Action.UPDATE)
-                            || restrictionDTO.getRestriction().getAction().equals(Action.ALL)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return hasUserRestriction(Permission.DEPLOYMENT.name(), null, Action.UPDATE, null, null);
+        return hasPermission(Permission.DEPLOYMENT, null, Action.UPDATE, null, null);
     }
 
     /**
@@ -128,28 +92,31 @@ public class PermissionService implements Serializable {
      *
      * @return Map key=Role.name, value=RestrictionDTOs
      */
-    public Map<String, List<RestrictionDTO>> getPermissions() {
-        boolean isReload = permissionRepository.isReloadRolesAndPermissionsList();
-        if (rolesWithRestrictions == null || isReload) {
-            Map<String, List<RestrictionDTO>> tmpRolesWithRestrictions = new HashMap<>();
-            // add new permissions with restriction
-            if (permissionRepository.getRolesWithRestrictions() != null) {
-                for (RoleEntity role : permissionRepository.getRolesWithRestrictions()) {
-                    addPermission(tmpRolesWithRestrictions, role);
-                }
-            }
-            //make immutable
-            for (String roleName : tmpRolesWithRestrictions.keySet()) {
-                List<RestrictionDTO> restrictions = tmpRolesWithRestrictions.get(roleName);
-                tmpRolesWithRestrictions.put(roleName, Collections.unmodifiableList(restrictions));
-            }
-            rolesWithRestrictions = Collections.unmodifiableMap(tmpRolesWithRestrictions);
-
-            if (isReload) {
-                permissionRepository.setReloadRolesAndPermissionsList(false);
-            }
+    public Map<String, List<RestrictionDTO>> getRolesWithRestrictions() {
+        if (rolesWithRestrictions == null) {
+            this.reloadRolesWithRestrictionsList();
         }
         return rolesWithRestrictions;
+    }
+
+    void reloadRolesWithRestrictionsList() {
+        Map<String, List<RestrictionDTO>> tmpRolesWithRestrictions = new HashMap<>();
+        // add new permissions with restriction
+        if (permissionRepository.getRolesWithRestrictions() != null) {
+            for (RoleEntity role : permissionRepository.getRolesWithRestrictions()) {
+                addPermission(tmpRolesWithRestrictions, role);
+            }
+        }
+        //make immutable
+        for (String roleName : tmpRolesWithRestrictions.keySet()) {
+            List<RestrictionDTO> restrictions = tmpRolesWithRestrictions.get(roleName);
+            tmpRolesWithRestrictions.put(roleName, Collections.unmodifiableList(restrictions));
+        }
+        rolesWithRestrictions = Collections.unmodifiableMap(tmpRolesWithRestrictions);
+    }
+
+    void resetUserRestrictionList() {
+        userRestrictions = new ConcurrentHashMap<>();
     }
 
     public List<RestrictionEntity> getUserRestrictionsForLoggedInUser() {
@@ -162,14 +129,11 @@ public class PermissionService implements Serializable {
      * @param userName
      */
     public List<RestrictionEntity> getUserRestrictions(String userName) {
-        if (permissionRepository.isReloadUserRestrictionsList() || userRestrictions == null) {
-            userRestrictions = new ConcurrentHashMap<>();
+        if (userRestrictions == null) {
+            resetUserRestrictionList();
         }
         if (!userRestrictions.containsKey(userName)) {
             userRestrictions.put(userName, Collections.unmodifiableList(permissionRepository.getUserWithRestrictions(userName)));
-            if (permissionRepository.isReloadUserRestrictionsList()) {
-                permissionRepository.setReloadUserRestrictionsList(false);
-            }
         }
         return userRestrictions.get(userName);
     }
@@ -328,29 +292,13 @@ public class PermissionService implements Serializable {
      * @param action
      */
     public boolean hasPermissionAndActionForDeploymentOnContext(ContextEntity context, ResourceGroupEntity resourceGroup, Action action) {
-        if (context != null && sessionContext != null) {
-            List<String> allowedRoles = new ArrayList<>();
-            String permissionName = Permission.DEPLOYMENT.name();
-            if (deployableRolesWithRestrictions == null) {
-                getDeployableRoles();
-            }
-            for (Map.Entry<String, List<RestrictionDTO>> entry : deployableRolesWithRestrictions.entrySet()) {
-                matchPermissionsAndContext(permissionName, action, context, resourceGroup, resourceGroup.getResourceType(), allowedRoles, entry);
-            }
-            for (String roleName : allowedRoles) {
-                if (sessionContext.isCallerInRole(roleName)) {
-                    return true;
-                }
-            }
-            return hasUserRestriction(permissionName, context, action, resourceGroup, null);
-        }
-        return false;
+        return hasUserRestriction(Permission.DEPLOYMENT.name(), context, action, resourceGroup, null);
     }
 
     private boolean hasRole(String permissionName, ContextEntity context, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
         if (sessionContext != null) {
             List<String> allowedRoles = new ArrayList<>();
-            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getPermissions().entrySet();
+            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
 
             if (resourceType == null && resourceGroup != null) {
                 resourceType = resourceGroup.getResourceType();
@@ -376,7 +324,7 @@ public class PermissionService implements Serializable {
     private boolean hasRoleOnAllContext(String permissionName, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
         if (sessionContext != null) {
             List<String> allowedRoles = new ArrayList<>();
-            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getPermissions().entrySet();
+            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
 
             if (resourceType == null && resourceGroup != null) {
                 resourceType = resourceGroup.getResourceType();
@@ -441,9 +389,9 @@ public class PermissionService implements Serializable {
         if (sessionContext == null) {
             return false;
         }
-        getUserRestrictions(getCurrentUserName());
-        if (!userRestrictions.get(getCurrentUserName()).isEmpty()) {
-            for (RestrictionEntity restrictionEntity : userRestrictions.get(getCurrentUserName())) {
+        List<RestrictionEntity> restrictions = getUserRestrictions(getCurrentUserName());
+        if (!restrictions.isEmpty()) {
+            for (RestrictionEntity restrictionEntity : restrictions) {
                 if (restrictionEntity.getPermission().getValue().equals(permissionName)) {
                     return hasRequiredUserRestrictionOnAllContext(null, action, resourceGroup, resourceType, restrictionEntity);
                 }
@@ -758,7 +706,7 @@ public class PermissionService implements Serializable {
      */
     public List<RestrictionEntity> getAllCallerRestrictions() {
         List<RestrictionEntity> restrictions = new ArrayList<>();
-        Map<String, List<RestrictionDTO>> roleWithRestrictions = getPermissions();
+        Map<String, List<RestrictionDTO>> roleWithRestrictions = getRolesWithRestrictions();
         for (String roleName : roleWithRestrictions.keySet()) {
             if (sessionContext.isCallerInRole(roleName)) {
                 for (RestrictionDTO restrictionDTO : roleWithRestrictions.get(roleName)) {
@@ -851,7 +799,7 @@ public class PermissionService implements Serializable {
 
     private boolean hasSimilarRoleRestriction(RestrictionEntity newRestriction) {
         List<RestrictionEntity> similarRestrictions = new ArrayList<>();
-        Set<Map.Entry<String, List<RestrictionDTO>>> entries = getPermissions().entrySet();
+        Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
         for (Map.Entry<String, List<RestrictionDTO>> entry : entries) {
             if (entry.getKey().equals(newRestriction.getRole().getName())) {
                 for (RestrictionDTO restrictionDTO : entry.getValue()) {

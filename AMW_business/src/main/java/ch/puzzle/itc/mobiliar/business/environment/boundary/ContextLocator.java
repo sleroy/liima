@@ -22,7 +22,9 @@ package ch.puzzle.itc.mobiliar.business.environment.boundary;
 
 import ch.puzzle.itc.mobiliar.business.environment.control.ContextRepository;
 import ch.puzzle.itc.mobiliar.business.environment.entity.ContextEntity;
+import ch.puzzle.itc.mobiliar.business.security.boundary.PermissionBoundary;
 import ch.puzzle.itc.mobiliar.business.security.control.PermissionRepository;
+import ch.puzzle.itc.mobiliar.business.security.control.PermissionService;
 import ch.puzzle.itc.mobiliar.business.security.control.RestrictionRepository;
 import ch.puzzle.itc.mobiliar.business.security.entity.Permission;
 import ch.puzzle.itc.mobiliar.business.security.interceptor.HasPermission;
@@ -43,7 +45,7 @@ public class ContextLocator {
 	ContextRepository contextRepository;
 
 	@Inject
-	PermissionRepository permissionRepository;
+	PermissionService permissionService;
 
 	@Inject
 	RestrictionRepository restrictionRepository;
@@ -76,8 +78,7 @@ public class ContextLocator {
 				}
 			}
 			restrictionRepository.deleteAllWithContext(context);
-			permissionRepository.setReloadRolesAndPermissionsList(true);
-			permissionRepository.setReloadDeployableRoleList(true);
+			permissionService.reloadRestrctionCache();
 			contextRepository.remove(context);
 		} else {
 			throw new AMWException("Es wurde versucht den Kontext \"Global\" (id: "+contextId+" zu löschen.");

@@ -637,7 +637,7 @@ public class PermissionBoundary implements Serializable {
      */
     @HasPermission(permission = Permission.ASSIGN_REMOVE_PERMISSION)
     public Map<String, List<RestrictionDTO>> getAllPermissions() {
-        return permissionService.getPermissions();
+        return permissionService.getRolesWithRestrictions();
     }
 
     /**
@@ -863,6 +863,6 @@ public class PermissionBoundary implements Serializable {
 
     @HasPermission(permission = Permission.ASSIGN_REMOVE_PERMISSION)
     public void reloadCache() {
-        permissionRepository.forceReloadingOfLists();
+        permissionService.reloadRestrctionCache();
     }
 }

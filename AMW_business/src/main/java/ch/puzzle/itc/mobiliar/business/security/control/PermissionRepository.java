@@ -20,10 +20,8 @@
 
 package ch.puzzle.itc.mobiliar.business.security.control;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -35,26 +33,6 @@ import ch.puzzle.itc.mobiliar.business.security.entity.*;
 public class PermissionRepository {
 	@Inject
 	private EntityManager entityManager;
-
-	private static boolean reloadDeployableRoleList;
-	private static boolean reloadRolesAndPermissionsList;
-	private static boolean reloadUserRestrictionsList;
-
-	@Schedule(hour = "*", minute = "*/20", persistent = false)
-	public void forceReloadingOfLists() {
-		reloadDeployableRoleList = true;
-		reloadRolesAndPermissionsList = true;
-		reloadUserRestrictionsList = true;
-	}
-
-	/**
-	 * Returns Roles which are allowed to deploy
-	 *
-	 * @return
-	 */
-	public List<RoleEntity> getDeployableRoles() {
-		return getRolesHavingRestrictionsWithPermission(Permission.DEPLOYMENT);
-	}
 
 	public List<RestrictionEntity> getUserWithRestrictions(String userName) {
 		TypedQuery<RestrictionEntity> query = entityManager.createQuery("select r from RestrictionEntity r where LOWER(r.user.name) =:userName", RestrictionEntity.class)
@@ -134,57 +112,6 @@ public class PermissionRepository {
 		}
 		// leads to a cascade delete of the restrictions
 		entityManager.remove(role);
-	}
-
-	public boolean isReloadDeployableRoleList() {
-		return reloadDeployableRoleList;
-	}
-
-	public void setReloadDeployableRoleList(boolean reloadDeployableRoleList) {
-		this.reloadDeployableRoleList = reloadDeployableRoleList;
-	}
-
-	public boolean isReloadRolesAndPermissionsList() {
-		return reloadRolesAndPermissionsList;
-	}
-
-	public void setReloadRolesAndPermissionsList(boolean reloadRolesAndPermissionsList) {
-		this.reloadRolesAndPermissionsList = reloadRolesAndPermissionsList;
-	}
-
-	public boolean isReloadUserRestrictionsList() {
-		return reloadUserRestrictionsList;
-	}
-
-	public void setReloadUserRestrictionsList(boolean reloadUserRestrictionsList) {
-		this.reloadUserRestrictionsList = reloadUserRestrictionsList;
-	}
-
-	/**
-	 * Returns Roles which have a Restriction matching the provided Permission
-	 *
-	 * @param permission Permission to match
-	 * @return
-	 */
-	private List<RoleEntity> getRolesHavingRestrictionsWithPermission(Permission permission) {
-		List<RoleEntity> result = entityManager
-				.createQuery("from RoleEntity r left join fetch r.restrictions res where res.permission.value =:permission", RoleEntity.class)
-				.setParameter("permission", permission.name()).getResultList();
-		return result == null ? new ArrayList<RoleEntity>() : result;
-	}
-
-	/**
-	 * Returns Roles which have a Restriction matching the provided Permission and Action
-	 *
-	 * @param permission
-	 * @param action
-	 * @return
-	 */
-	private List<RoleEntity> getRolesHavingRestrictionsWithPermissionAndAction(Permission permission, Action action) {
-		List<RoleEntity> result = entityManager
-				.createQuery("from RoleEntity r left join fetch r.restrictions res where res.permission.value =:permission and (res.action =:action or res.action = 'ALL')", RoleEntity.class)
-				.setParameter("permission", permission.name()).setParameter("action", action).getResultList();
-		return result == null ? new ArrayList<RoleEntity>() : result;
 	}
 
 }
