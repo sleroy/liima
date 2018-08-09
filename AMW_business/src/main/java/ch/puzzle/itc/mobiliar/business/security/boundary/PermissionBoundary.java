@@ -170,12 +170,6 @@ public class PermissionBoundary implements Serializable {
         return permissionService.hasPermission(permission, action);
     }
 
-    public boolean hasPermissionOnAllContext(String permissionName, String actionName) {
-        Permission permission = Permission.valueOf(permissionName);
-        Action action = Action.valueOf(actionName);
-        return permissionService.hasPermissionOnAllContext(permission, action, null, null);
-    }
-
     public boolean hasPermissionForResourceType(String permissionName, String actionName, String resourceTypeName) {
         Permission permission = Permission.valueOf(permissionName);
         Action action = Action.valueOf(actionName);
@@ -378,7 +372,7 @@ public class PermissionBoundary implements Serializable {
             return false;
         }
         ResourceEntity resource = entityManager.find(ResourceEntity.class, resourceEntityId);
-        return permissionService.hasPermissionOnAllContext(Permission.RESOURCE_PROPERTY_DECRYPT, Action.ALL, resource.getResourceGroup(), null);
+        return permissionService.hasPermission(Permission.RESOURCE_PROPERTY_DECRYPT, null, Action.ALL, resource.getResourceGroup(), null);
     }
 
     public boolean canToggleDecryptionOfResourceType(Integer resourceTypeEntityId) {
@@ -386,7 +380,7 @@ public class PermissionBoundary implements Serializable {
             return false;
         }
         ResourceTypeEntity resourceType = entityManager.find(ResourceTypeEntity.class, resourceTypeEntityId);
-        return permissionService.hasPermissionOnAllContext(Permission.RESOURCETYPE_PROPERTY_DECRYPT, Action.ALL, null, resourceType);
+        return permissionService.hasPermission(Permission.RESOURCETYPE_PROPERTY_DECRYPT, null, Action.ALL, null, resourceType);
     }
 
     public boolean hasPermissionToDeploy() {
@@ -569,18 +563,12 @@ public class PermissionBoundary implements Serializable {
             throws AMWException {
         validateRestriction(roleName, userName, permissionName, resourceGroupId, resourceTypeName, resourceTypePermission,
                 contextName, action, restriction);
-        if (permissionService.identicalOrMoreGeneralRestrictionExists(restriction)) {
-            return null;
-        }
         return restrictionRepository.create(restriction);
     }
 
     private Integer createAutoAssignedRestriction(String userName, String permissionName, Integer resourceGroupId, Action action, RestrictionEntity restriction)
             throws AMWException {
         validateRestriction(null, userName, permissionName, resourceGroupId, null, null, null, action, restriction);
-        if (permissionService.callerHasIdenticalOrMoreGeneralRestriction(restriction)) {
-            return null;
-        }
         final Integer id = restrictionRepository.create(restriction);
         return id;
     }
@@ -609,9 +597,6 @@ public class PermissionBoundary implements Serializable {
         }
         validateRestriction(roleName, userName, permissionName, resourceId, resourceTypeName, resourceTypePermission,
                 contextName, action, restriction);
-        if (permissionService.identicalOrMoreGeneralRestrictionExists(restriction)) {
-            return false;
-        }
         restrictionRepository.merge(restriction);
         if (reload) {
             reloadCache();

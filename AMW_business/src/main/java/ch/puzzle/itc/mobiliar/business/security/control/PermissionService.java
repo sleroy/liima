@@ -86,6 +86,35 @@ public class PermissionService implements Serializable {
         return hasPermission(Permission.DEPLOYMENT, null, Action.UPDATE, null, null);
     }
 
+    public boolean hasPermissionForDeploymentUpdate(DeploymentEntity deployment) {
+        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.UPDATE);
+    }
+
+    public boolean hasPermissionForDeploymentCreation(DeploymentEntity deployment) {
+        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.CREATE);
+    }
+
+    public boolean hasPermissionForDeploymentReject(DeploymentEntity deployment) {
+        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.DELETE);
+    }
+
+    public boolean hasPermissionForCancelDeployment(DeploymentEntity deployment) {
+        // cancel is only for requester
+        return getCurrentUserName().equals(deployment.getDeploymentRequestUser());
+    }
+
+    /**
+     * Checks if the caller is allowed to perform the requested action for specific ResourceGroup on the specific Environment
+     * Note: Both, Permission/Restriction by Group and by User are checked
+     *
+     * @param context
+     * @param resourceGroup
+     * @param action
+     */
+    public boolean hasPermissionAndActionForDeploymentOnContext(ContextEntity context, ResourceGroupEntity resourceGroup, Action action) {
+        return hasPermission(Permission.DEPLOYMENT, context, action, resourceGroup, null);
+    }
+
     /**
      * Returns all available Roles with their Restrictions
      * Legacy Permissions are mapped to the new Permission/Restriction model
@@ -166,8 +195,7 @@ public class PermissionService implements Serializable {
      * @param permission
      */
     public boolean hasPermission(Permission permission) {
-        return hasRole(permission.name(), null, null, null, null) ||
-                hasUserRestriction(permission.name(), null, null, null, null);
+        return hasPermission(permission, null, ALL, null, null);
     }
 
     /**
@@ -177,13 +205,11 @@ public class PermissionService implements Serializable {
      * @param permission
      */
     public boolean hasPermission(Permission permission, Action action) {
-        return hasRole(permission.name(), null, action, null, null) ||
-                hasUserRestriction(permission.name(), null, action, null, null);
+        return hasPermission(permission, null, action, null, null);
     }
 
     public boolean hasPermission(Permission permission, Action action, ResourceTypeEntity resourceType) {
-        return hasRole(permission.name(), null, action, null, resourceType) ||
-                hasUserRestriction(permission.name(), null, action, null, resourceType);
+        return hasPermission(permission, null, action, null, resourceType);
     }
 
     /**
@@ -199,21 +225,6 @@ public class PermissionService implements Serializable {
                                  ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
         return hasRole(permission.name(), context, action, resourceGroup, resourceType) ||
                 hasUserRestriction(permission.name(), context, action, resourceGroup, resourceType);
-    }
-
-    /**
-     * Checks if a user has a role or a restriction with a certain Permission on ALL Contexts
-     * => context MUST NOT be restricted to a specific environment
-     *
-     * @param permission the required Permission
-     * @param action the required Action
-     * @param resourceGroup the requested resourceGroup (null = irrelevant)
-     * @param resourceType the requested resourceType (null = irrelevant)
-     */
-    public boolean hasPermissionOnAllContext(Permission permission, Action action,
-                                             ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
-        return hasRoleOnAllContext(permission.name(), action, resourceGroup, resourceType) ||
-                hasUserRestrictionOnAllContext(permission.name(), action, resourceGroup, resourceType);
     }
 
     /**
@@ -266,76 +277,17 @@ public class PermissionService implements Serializable {
         throw new NotAuthorizedException(errorMessage);
     }
 
-    public boolean hasPermissionForDeploymentUpdate(DeploymentEntity deployment) {
-        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.UPDATE);
-    }
-
-    public boolean hasPermissionForDeploymentCreation(DeploymentEntity deployment) {
-        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.CREATE);
-    }
-
-    public boolean hasPermissionForDeploymentReject(DeploymentEntity deployment) {
-        return hasPermissionAndActionForDeploymentOnContext(deployment.getContext(), deployment.getResource().getResourceGroup(), Action.DELETE);
-    }
-
-    public boolean hasPermissionForCancelDeployment(DeploymentEntity deployment) {
-        // cancel is only for requester
-        return getCurrentUserName().equals(deployment.getDeploymentRequestUser());
-    }
-
-    /**
-     * Checks if the caller is allowed to perform the requested action for specific ResourceGroup on the specific Environment
-     * Note: Both, Permission/Restriction by Group and by User are checked
-     *
-     * @param context
-     * @param resourceGroup
-     * @param action
-     */
-    public boolean hasPermissionAndActionForDeploymentOnContext(ContextEntity context, ResourceGroupEntity resourceGroup, Action action) {
-        return hasUserRestriction(Permission.DEPLOYMENT.name(), context, action, resourceGroup, null);
-    }
-
     private boolean hasRole(String permissionName, ContextEntity context, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
-        if (sessionContext != null) {
-            List<String> allowedRoles = new ArrayList<>();
-            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
-
-            if (resourceType == null && resourceGroup != null) {
-                resourceType = resourceGroup.getResourceType();
-            }
-
-            for (Map.Entry<String, List<RestrictionDTO>> entry : entries) {
-                // context null means no check on context required - so any context is ok
-                if (context == null) {
-                    matchPermissions(permissionName, action, resourceGroup, resourceType, allowedRoles, entry);
-                } else {
-                    matchPermissionsAndContext(permissionName, action, context, resourceGroup, resourceType, allowedRoles, entry);
-                }
-            }
-            for (String roleName : allowedRoles) {
-                if (sessionContext.isCallerInRole(roleName)) {
-                    return true;
-                }
-            }
+        if (getCurrentUserName() == null) {
+            return false;
         }
-        return false;
-    }
 
-    private boolean hasRoleOnAllContext(String permissionName, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
-        if (sessionContext != null) {
-            List<String> allowedRoles = new ArrayList<>();
-            Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
-
-            if (resourceType == null && resourceGroup != null) {
-                resourceType = resourceGroup.getResourceType();
-            }
-
-            for (Map.Entry<String, List<RestrictionDTO>> entry : entries) {
-                matchPermissionsAndContext(permissionName, action, null, resourceGroup, resourceType, allowedRoles, entry);
-            }
-            for (String roleName : allowedRoles) {
-                if (sessionContext.isCallerInRole(roleName)) {
-                    return true;
+        for (String roleName : getRolesWithRestrictions().keySet()) {
+            for(RestrictionDTO restrictionDTO : getRolesWithRestrictions().get(roleName)) {
+                if (matchRestriction(permissionName, action, context, resourceGroup, resourceType, restrictionDTO.getRestriction())) {
+                    if(sessionContext.isCallerInRole(roleName)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -354,166 +306,27 @@ public class PermissionService implements Serializable {
      * @param resourceType
      */
     private boolean hasUserRestriction(String permissionName, ContextEntity context, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
-        if (sessionContext == null) {
+        if (getCurrentUserName() == null) {
             return false;
         }
 
-        for (RestrictionEntity restrictionEntity : getUserRestrictions(getCurrentUserName())) {
-            if (restrictionEntity.getPermission().getValue().equals(permissionName)) {
-                // context null means no check on context required - so any context is ok
-                if (context == null) {
-                		if(hasRequiredUserRestriction(action, resourceGroup, resourceType, restrictionEntity)) {
-                			return true;
-                		}
-                }
-                if(hasRequiredUserRestrictionOnAllContext(context, action, resourceGroup, resourceType, restrictionEntity)) {
-                		return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks if the logged-in user has a Restriction with the required Permission for a specific Action, ResourceGroup
-     * and/or ResourceType ON ALL context
-     * => will return false if the user restriction is restricted to a specific context
-     *
-     * @param permissionName
-     * @param action
-     * @param resourceGroup
-     * @param resourceType
-     */
-    private boolean hasUserRestrictionOnAllContext(String permissionName, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType) {
-        if (sessionContext == null) {
-            return false;
-        }
-        List<RestrictionEntity> restrictions = getUserRestrictions(getCurrentUserName());
-        if (!restrictions.isEmpty()) {
-            for (RestrictionEntity restrictionEntity : restrictions) {
-                if (restrictionEntity.getPermission().getValue().equals(permissionName)) {
-                    return hasRequiredUserRestrictionOnAllContext(null, action, resourceGroup, resourceType, restrictionEntity);
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether a Role has the Permission perform a certain Action
-     * If so, it adds the role to the list of the allowed roles
-     *
-     * @param permissionName
-     * @param action
-     * @param resourceGroup
-     * @param resourceType
-     * @param allowedRoles
-     * @param entry
-     */
-    private void matchPermissions(String permissionName, Action action, ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType, List<String> allowedRoles, Map.Entry<String, List<RestrictionDTO>> entry) {
-        String roleName = entry.getKey();
-        for (RestrictionDTO restrictionDTO : entry.getValue()) {
-            if (restrictionDTO.getPermissionName().equals(permissionName) && hasPermissionForAction(restrictionDTO.getRestriction(), action)
-                    && hasPermissionForResource(restrictionDTO.getRestriction(), resourceGroup) && hasPermissionForResourceType(restrictionDTO.getRestriction(), resourceType)
-                    && hasPermissionForDefaultResourceType(restrictionDTO.getRestriction(), resourceType)) {
-                allowedRoles.add(roleName);
-            }
-        }
-    }
-
-    /**
-     * Checks whether a Role has the Permission perform a certain Action with a specific ResourceGroup on a specific Context (or on its parent)
-     * If so, it adds the role to the list of the allowed roles
-     *
-     * @param permissionName
-     * @param action
-     * @param context
-     * @param resourceGroup
-     * @param allowedRoles
-     * @param entry
-     */
-    private void matchPermissionsAndContext(String permissionName, Action action, ContextEntity context,
-                                            ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType, List<String> allowedRoles, Map.Entry<String, List<RestrictionDTO>> entry) {
-        for (RestrictionDTO restrictionDTO : entry.getValue()) {
-            if (restrictionDTO.getPermissionName().equals(permissionName)) {
-                checkContextAndActionAndResource(context, action, resourceGroup, resourceType, allowedRoles, entry, restrictionDTO.getRestriction());
-            }
-        }
-    }
-
-    /**
-     * Checks if a Role is allowed to perform a certain Action with a specific ResourceGroup on a specific Context (or on its parent)
-     * If so, it adds the role to the list of the allowed roles
-     *
-     * @param context
-     * @param action
-     * @param resource
-     * @param resourceType
-     * @param allowedRoles
-     * @param entry
-     * @param restriction
-     */
-    private void checkContextAndActionAndResource(ContextEntity context, Action action, ResourceGroupEntity resource, ResourceTypeEntity resourceType,
-                                                  List<String> allowedRoles, Map.Entry<String, List<RestrictionDTO>> entry,
-                                                  RestrictionEntity restriction) {
-        if (hasPermissionForContext(restriction, context) && hasPermissionForAction(restriction, action) &&
-                hasPermissionForResource(restriction, resource) && hasPermissionForResourceType(restriction, resourceType)
-                && hasPermissionForDefaultResourceType(restriction, resourceType)) {
-            allowedRoles.add(entry.getKey());
-        } else if (context != null && context.getParent() != null) {
-            checkContextAndActionAndResource(context.getParent(), action, resource, resourceType, allowedRoles, entry, restriction);
-        }
-    }
-
-    /**
-     * Checks if a User is allowed to perform a certain Action with a specific ResourceGroup on a specific Context (or on its parent)
-     *
-     * @param context
-     * @param action
-     * @param resource
-     * @param resourceType
-     * @param restriction
-     */
-    private boolean hasRequiredUserRestrictionOnAllContext(ContextEntity context, Action action, ResourceGroupEntity resource,
-                                                           ResourceTypeEntity resourceType, RestrictionEntity restriction) {
-        if (hasPermissionForContext(restriction, context) && hasPermissionForAction(restriction, action) &&
-                hasPermissionForResource(restriction, resource) && hasPermissionForResourceType(restriction, resourceType)
-                && hasPermissionForDefaultResourceType(restriction, resourceType)) {
-            return true;
-        } else if (context != null && context.getParent() != null) {
-            if (hasRequiredUserRestrictionOnAllContext(context.getParent(), action, resource, resourceType, restriction)) {
+        for (RestrictionEntity restriction : getUserRestrictions(getCurrentUserName())) {
+            if (matchRestriction(permissionName, action, context, resourceGroup, resourceType, restriction)) {
                 return true;
             }
         }
+
         return false;
     }
-
-    /**
-     * Checks if a User is allowed to perform a certain Action with a specific ResourceGroup/ResourceType
-     *
-     * @param action
-     * @param resource
-     * @param resourceType
-     * @param restriction
-     */
-    private boolean hasRequiredUserRestriction(Action action, ResourceGroupEntity resource,
-                                               ResourceTypeEntity resourceType, RestrictionEntity restriction) {
-        return (hasPermissionForAction(restriction, action) && hasPermissionForResource(restriction, resource)
+    
+    private boolean matchRestriction(String permissionName, Action action, ContextEntity context, ResourceGroupEntity resourceGroup,
+            ResourceTypeEntity resourceType, RestrictionEntity restriction) {
+        return restriction.getPermission().getValue().equals(permissionName)
+                && hasPermissionForAction(restriction, action) 
+                && hasPermissionForResourceGroup(restriction, resourceGroup)
                 && hasPermissionForResourceType(restriction, resourceType)
-                && hasPermissionForDefaultResourceType(restriction, resourceType));
-    }
-
-    /**
-     * Checks if a Restriction gives permission for a specific Context
-     * No Context on Restriction means all Contexts are allowed
-     *
-     * @param restriction
-     * @param context
-     */
-    private boolean hasPermissionForContext(RestrictionEntity restriction, ContextEntity context) {
-        return restriction.getContext() == null ||
-                (context != null && restriction.getContext().getId().equals(context.getId()));
+                && hasPermissionForDefaultResourceType(restriction, resourceType)
+                && hasPermissionForContextOrForParent(restriction, context);
     }
 
     /**
@@ -540,6 +353,7 @@ public class PermissionService implements Serializable {
                 restriction.getAction().equals(ALL);
     }
 
+
     /**
      * Checks if a Restriction gives permission for a specific ResourceGroup
      * No Resource on Restriction means all ResourceGroups are allowed
@@ -547,9 +361,50 @@ public class PermissionService implements Serializable {
      * @param restriction
      * @param resourceGroup
      */
-    private boolean hasPermissionForResource(RestrictionEntity restriction, ResourceGroupEntity resourceGroup) {
-        return resourceGroup == null || restriction.getResourceGroup() == null ||
-                restriction.getResourceGroup().getId().equals(resourceGroup.getId());
+    private boolean hasPermissionForResourceGroup(RestrictionEntity restriction, ResourceGroupEntity resourceGroup) {
+        if (checkGroup(restriction.getResourceGroup(), resourceGroup)) {
+            return true;
+        }
+        if (checkGroupType(restriction.getResourceType(), resourceGroup.getResourceType())) {
+            return true;
+        }
+        return checkGroupCategory(restriction.getResourceTypePermission(), resourceGroup.getResourceType());
+
+    }
+
+    private boolean checkGroup(ResourceGroupEntity restrictionResourceGroup, ResourceGroupEntity resourceGroup) {
+        if (restrictionResourceGroup == null) {
+            return false;
+        }
+        return restrictionResourceGroup.getId().equals(resourceGroup.getId());
+    }
+
+    private boolean checkGroupType(ResourceTypeEntity restrictionResourceType, ResourceTypeEntity groupResourceType) {
+        if (restrictionResourceType == null) {
+            return false;
+        }
+        if (restrictionResourceType.getId().equals(groupResourceType.getId())) {
+            return true;
+        }
+        // check if resourceType restriction matches resourceGroup parent type
+        if (groupResourceType.getParentResourceType() == null) {
+            return false;
+        }
+        return restrictionResourceType.getId().equals(groupResourceType.getParentResourceType().getId());
+    }
+
+    private boolean checkGroupCategory(ResourceTypePermission resourceTypeRestriction, ResourceTypeEntity groupResourceType) {
+        if (resourceTypeRestriction.equals(ResourceTypePermission.ANY)) {
+            return true;
+        }
+        // Only DefaultTypes are allowed
+        if (resourceTypeRestriction.equals(ResourceTypePermission.DEFAULT_ONLY)
+                && DefaultResourceTypeDefinition.contains(groupResourceType.getName())) {
+            return true;
+        }
+        // Only non DefaultTypes are allowed
+        return resourceTypeRestriction.equals(ResourceTypePermission.NON_DEFAULT_ONLY)
+                && !DefaultResourceTypeDefinition.contains(groupResourceType.getName());
     }
 
     /**
@@ -560,36 +415,17 @@ public class PermissionService implements Serializable {
      * @param resourceType
      */
     private boolean hasPermissionForResourceType(RestrictionEntity restriction, ResourceTypeEntity resourceType) {
-        if (resourceType == null || restriction.getResourceType() == null) {
-            return true;
+        if (restriction.getResourceType() == null) {
+            return false;
+        }
+        if (resourceType == null) {
+            return false;
         }
         if (restriction.getResourceType().getId().equals(resourceType.getId())) {
             return true;
         }
         return resourceType.getParentResourceType() != null &&
                 restriction.getResourceType().getId().equals(resourceType.getParentResourceType().getId());
-    }
-
-    /**
-     * Checks if a Restriction gives permission for a specific (Default)ResourceType
-     * No DefaultResourceType on Restriction means all ResourceTypes (including DefaultResourceTypes) are allowed
-     *
-     * @param restriction
-     * @param resourceType
-     */
-    private boolean hasPermissionForDefaultResourceType(RestrictionEntity restriction, ResourceTypeEntity resourceType) {
-        // Default and non DefaultTypes are allowed
-        if (resourceType == null || restriction.getResourceTypePermission().equals(ResourceTypePermission.ANY)) {
-            return true;
-        }
-        // Only DefaultTypes are allowed
-        if (restriction.getResourceTypePermission().equals(ResourceTypePermission.DEFAULT_ONLY)
-                && DefaultResourceTypeDefinition.contains(resourceType.getName())) {
-            return true;
-        }
-        // Only non DefaultTypes are allowed
-        return restriction.getResourceTypePermission().equals(ResourceTypePermission.NON_DEFAULT_ONLY)
-                && !DefaultResourceTypeDefinition.contains(resourceType.getName());
     }
 
     /**
@@ -608,13 +444,7 @@ public class PermissionService implements Serializable {
      * @param context
      */
     public boolean hasPermissionToAddRelation(ResourceEntity resourceEntity, ContextEntity context) {
-        if (resourceEntity != null && resourceEntity.getResourceType() != null) {
-            return hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), null);
-        }
-        if (resourceEntity != null && resourceEntity.getResourceType() == null) {
-            return false;
-        }
-        return hasPermission(Permission.RESOURCE, UPDATE);
+        return hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), resourceEntity.getResourceType());
     }
 
     /**
@@ -636,7 +466,7 @@ public class PermissionService implements Serializable {
      */
     public boolean hasPermissionToDeleteRelation(ResourceEntity resourceEntity, ContextEntity context) {
         if (resourceEntity != null && resourceEntity.getResourceType() != null) {
-            if (hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), null)) {
+            if (hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), resourceEntity.getResourceType())) {
                 return true;
             }
         }
@@ -734,178 +564,8 @@ public class PermissionService implements Serializable {
     public boolean hasPermissionToDelegatePermission(Permission permission, ResourceGroupEntity resourceGroup,
                                                      ResourceTypeEntity resourceType, ContextEntity context, Action action) {
         if (hasPermission(Permission.PERMISSION_DELEGATION)) {
-            // specific
-            if (context != null && action != null && (resourceGroup != null || resourceType != null)) {
-                return hasPermission(permission, context, action, resourceGroup, resourceType);
-            } else {
-                List<RestrictionEntity> callerRestrictions = getAllCallerRestrictions();
-                for (RestrictionEntity restriction : callerRestrictions) {
-                    if (restriction.getPermission().getValue().equals(permission.name())) {
-                        int score = 0;
-                        if (hasPermissionForContextOrForParent(restriction, context)) {
-                            ++score;
-                        }
-                        if (restriction.getAction().equals(Action.ALL) || restriction.getAction().equals(action)) {
-                            ++score;
-                        }
-                        if (restriction.getResourceGroup() == null || restriction.getResourceGroup().equals(resourceGroup)) {
-                            ++score;
-                        }
-                        if (restriction.getResourceType() == null || restriction.getResourceType().equals(resourceType)) {
-                            ++score;
-                        }
-                        if (score == 4) {
-                            return true;
-                        }
-                    }
-                }
-            }
+            return hasPermission(permission, context, action, resourceGroup, resourceType);
         }
         return false;
     }
-
-    /**
-     * Checks if the caller already has a Restriction similar to the given Restriction
-     * Returns true if he already has a similar, equal or less restrictive Restriction
-     * Returns false if he does not have a similar or just one that is more restrictive than the given one
-     *
-     * @param newRestriction
-     */
-    public boolean callerHasIdenticalOrMoreGeneralRestriction(RestrictionEntity newRestriction) {
-        List<RestrictionEntity> similarRestrictions = new ArrayList<>();
-        for (RestrictionEntity restriction : getAllCallerRestrictions()) {
-            if (restriction.getPermission().getValue().equals(newRestriction.getPermission().getValue())) {
-                checkSimilarRestrictions(newRestriction.getPermission().getValue(), newRestriction.getAction(), newRestriction.getContext(), newRestriction.getResourceGroup(), newRestriction.getResourceType(), similarRestrictions, restriction);
-            }
-        }
-        return aMoreGeneralRestrictionExists(newRestriction, similarRestrictions);
-    }
-
-    /**
-     * Checks if a Restriction similar to the given Restriction already exists
-     * Returns true if a similar, equal or less restrictive Restriction exists
-     * Returns false if no similar or one that is more restrictive than the given one exists
-     *
-     * @param newRestriction
-     */
-    public boolean identicalOrMoreGeneralRestrictionExists(RestrictionEntity newRestriction) {
-        if (newRestriction.getRole() != null) {
-            return hasSimilarRoleRestriction(newRestriction);
-        } else if (newRestriction.getUser() != null) {
-            return hasSimilarUserRestriction(newRestriction);
-        }
-        return false;
-    }
-
-    private boolean hasSimilarRoleRestriction(RestrictionEntity newRestriction) {
-        List<RestrictionEntity> similarRestrictions = new ArrayList<>();
-        Set<Map.Entry<String, List<RestrictionDTO>>> entries = getRolesWithRestrictions().entrySet();
-        for (Map.Entry<String, List<RestrictionDTO>> entry : entries) {
-            if (entry.getKey().equals(newRestriction.getRole().getName())) {
-                for (RestrictionDTO restrictionDTO : entry.getValue()) {
-                    if (restrictionDTO.getPermissionName().equals(newRestriction.getPermission().getValue())) {
-                        checkSimilarRestrictions(newRestriction.getPermission().getValue(), newRestriction.getAction(), newRestriction.getContext(), newRestriction.getResourceGroup(), newRestriction.getResourceType(), similarRestrictions, restrictionDTO.getRestriction());
-                    }
-                }
-                return aMoreGeneralRestrictionExists(newRestriction, similarRestrictions);
-            }
-        }
-        return false;
-    }
-
-    private boolean hasSimilarUserRestriction(RestrictionEntity newRestriction) {
-        List<RestrictionEntity> similarRestrictions = new ArrayList<>();
-        for (RestrictionEntity restrictionEntity : getUserRestrictions(newRestriction.getUser().getName())) {
-            if (restrictionEntity.getPermission().getValue().equals(newRestriction.getPermission().getValue())) {
-                checkSimilarRestrictions(newRestriction.getPermission().getValue(), newRestriction.getAction(), newRestriction.getContext(), newRestriction.getResourceGroup(), newRestriction.getResourceType(), similarRestrictions, restrictionEntity);
-            }
-        }
-        return aMoreGeneralRestrictionExists(newRestriction, similarRestrictions);
-    }
-
-    /**
-     * Checks whether an existing Restriction is similar to the one which should be created
-     * If so, it adds the existing Restriction to the list of the similar Restrictions
-     *
-     * @param permissionName of the Restriction to be created
-     * @param action of the Restriction to be created
-     * @param context of the Restriction to be created
-     * @param resourceGroup allowed by the Restriction to be created
-     * @param similarRestrictions a list containing similar RestrictionEntities
-     * @param existingRestriction an existing RestrictionEntity to which the other will be compared to
-     */
-    private void checkSimilarRestrictions(String permissionName, Action action, ContextEntity context,
-                                          ResourceGroupEntity resourceGroup, ResourceTypeEntity resourceType,
-                                          List<RestrictionEntity> similarRestrictions, RestrictionEntity existingRestriction) {
-        if (permissionName.equals(existingRestriction.getPermission().getValue())) {
-            similarByContextAndActionAndResource(context, action, resourceGroup, resourceType, similarRestrictions, existingRestriction);
-        }
-    }
-
-    /**
-     * Checks if an existing Restriction is allowed to perform the same Action on the same ResourceGroup on the same Context (or on its parent) as the one to be created
-     * If so, it adds the existing Restriction to the list of the similar Restrictions
-     *
-     * @param context of the Restriction to be created
-     * @param action of the Restriction to be created
-     * @param resource allowed by the Restriction to be created
-     * @param resourceType allowed by the Restriction to be created
-     * @param similarRestrictions a list containing similar RestrictionEntities
-     * @param existingRestriction an existing RestrictionEntity to which the other will be compared to
-     */
-    private void similarByContextAndActionAndResource(ContextEntity context, Action action, ResourceGroupEntity resource, ResourceTypeEntity resourceType,
-                                                      List<RestrictionEntity> similarRestrictions, RestrictionEntity existingRestriction) {
-        if (hasPermissionForContext(existingRestriction, context) && hasPermissionForAction(existingRestriction, action) &&
-                hasPermissionForResource(existingRestriction, resource) && hasPermissionForResourceType(existingRestriction, resourceType)
-                && hasPermissionForDefaultResourceType(existingRestriction, resourceType)) {
-            similarRestrictions.add(existingRestriction);
-        } else if (context != null && context.getParent() != null) {
-            similarByContextAndActionAndResource(context.getParent(), action, resource, resourceType, similarRestrictions, existingRestriction);
-        }
-    }
-
-    /**
-     * Checks if a more general Restriction (one who grants more rights) exists
-     *
-     * @param newRestriction
-     * @param similarRestrictions
-     */
-    private boolean aMoreGeneralRestrictionExists(RestrictionEntity newRestriction, Collection<RestrictionEntity> similarRestrictions) {
-        if (similarRestrictions.size() > 0) {
-            for (RestrictionEntity existingRestriction : similarRestrictions) {
-                if (isMoreSpecificRestriction(newRestriction, existingRestriction)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks if restrictionEntityOne is more specific (grants less rights) than restrictionEntityTwo
-     *
-     * @param restrictionEntityOne
-     * @param restrictionEntityTwo
-     */
-    private boolean isMoreSpecificRestriction(RestrictionEntity restrictionEntityOne, RestrictionEntity restrictionEntityTwo) {
-        // allow update of existing - do not compare with itself
-        if (restrictionEntityOne.getId() != null && restrictionEntityOne.getId().equals(restrictionEntityTwo.getId())) {
-            return false;
-        }
-        if (restrictionEntityOne.getAction().equals(Action.ALL) && !restrictionEntityTwo.getAction().equals(Action.ALL)) {
-            return false;
-        }
-        if (restrictionEntityOne.getResourceGroup() == null && restrictionEntityTwo.getResourceGroup() != null) {
-            return false;
-        }
-        if (restrictionEntityOne.getResourceType() == null && restrictionEntityTwo.getResourceType() != null) {
-            return false;
-        }
-        if (restrictionEntityOne.getResourceTypePermission().equals(ResourceTypePermission.ANY) &&
-                !restrictionEntityTwo.getResourceTypePermission().equals(ResourceTypePermission.ANY)) {
-            return false;
-        }
-        return true;
-    }
-
 }

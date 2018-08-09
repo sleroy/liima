@@ -35,7 +35,7 @@ import java.io.Serializable;
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Entity
-@Table(name="TAMW_restriction")
+@Table(name="TAMW_restriction", uniqueConstraints={@UniqueConstraint(columnNames = {"role_id" , "user_id", "permission_id", "action", "resourceTypePermission", "context_id", "resourceType_id", "resourcegroup_id"})})
 public class RestrictionEntity implements Serializable {
 
     private static final long serialVersionUID = 7865243852438L;

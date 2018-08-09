@@ -35,4 +35,8 @@
 
     </changeSet>
 
+    <changeSet author="yvespp" id="newRestrictionEntityUniqueConstraint">
+        <addUniqueConstraint tableName="TAMW_restriction" columnNames="role_id, user_id, permission_id, action, resourceTypePermission, context_id, resourceType_id, resourcegroup_id" constraintName="TAMW_RESTRICTION_UK"/>
+    </changeSet>
+
 </databaseChangeLog>

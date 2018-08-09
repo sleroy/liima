@@ -31,6 +31,9 @@ public class RestrictionDTOBuilder {
         RestrictionDTO mock = mock(RestrictionDTO.class);
         when(mock.getPermissionName()).thenReturn(permission.name());
         when(mock.getRestriction()).thenReturn(restrictionEntity);
+        PermissionEntity permissionEntity = new PermissionEntity();
+        permissionEntity.setValue(permission.toString());
+        restrictionEntity.setPermission(permissionEntity);
         return mock;
     }
 
