@@ -22,7 +22,6 @@ package ch.puzzle.itc.mobiliar.business.security.control;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ejb.SessionContext;
 import javax.persistence.EntityManager;
@@ -38,10 +37,7 @@ import ch.puzzle.itc.mobiliar.business.security.entity.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-
-import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
 
 import static org.mockito.Mockito.*;
 
@@ -106,12 +102,10 @@ public class PermissionServiceTest {
 	@Test
 	public void shouldNotAllowToRemoveDefaultInstanceOfResTypeIfHasPermissionForResourcesOnly(){
 		// given
-		ResourceTypeEntity applicationResTypeEntity = new ResourceTypeEntity();
-		applicationResTypeEntity.setName(DefaultResourceTypeDefinition.APPLICATION.name());
-
 		when(sessionContext.isCallerInRole(CONFIG_ADMIN)).thenReturn(true);
 		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
 		myRoles = new HashMap<>();
+		// Grant RESOURCE DELETE on NON_DEFAULT_ONLY
 		PermissionEntity permission = new PermissionEntity();
 		permission.setValue(Permission.RESOURCE.name());
 		RestrictionEntity res = new RestrictionEntity();
@@ -121,7 +115,7 @@ public class PermissionServiceTest {
 		myRoles.put(CONFIG_ADMIN, Arrays.asList(new RestrictionDTO(res)));
 		permissionService.rolesWithRestrictions = myRoles;
 		// when
-		boolean result = permissionService.hasPermissionToRemoveInstanceOfResType(applicationResTypeEntity);
+		boolean result = permissionService.hasPermission(Permission.RESOURCE, Action.DELETE, appResourceGroup);
 		// then
 		Assert.assertFalse(result);
 	}
@@ -129,11 +123,14 @@ public class PermissionServiceTest {
 	@Test
 	public void shouldNotAllowToRemoveInstanceOfNonDefaultResTypeIfHasPermissionToDeleteInstancesOfDefaultResourceTypeOnly(){
 		// given
-		ResourceTypeEntity nonDefaultResType = new ResourceTypeEntity();
+
+		ResourceEntity ws = resourceEntityBuilder.mockResourceEntity("ws", new ResourceGroupEntity(), "webservice", null);
+		ws.getResourceGroup().setResourceType(ws.getResourceType());
 
 		when(sessionContext.isCallerInRole(SERVER_ADMIN)).thenReturn(true);
 		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
 		myRoles = new HashMap<>();
+		// Grant RESOURCE DELETE on DEFAULT_ONLY to SERVER_ADMIN
 		PermissionEntity permission = new PermissionEntity();
 		permission.setValue(Permission.RESOURCE.name());
 		RestrictionEntity res = new RestrictionEntity();
@@ -143,7 +140,7 @@ public class PermissionServiceTest {
 		myRoles.put(SERVER_ADMIN, Arrays.asList(new RestrictionDTO(res)));
 		permissionService.rolesWithRestrictions = myRoles;
 		// when
-		boolean result = permissionService.hasPermissionToRemoveInstanceOfResType(nonDefaultResType);
+		boolean result = permissionService.hasPermission(Permission.RESOURCE, Action.DELETE, ws.getResourceGroup());
 		// then
 		Assert.assertFalse(result);
 	}
@@ -151,12 +148,10 @@ public class PermissionServiceTest {
 	@Test
 	public void shouldAllowToRemoveDefaultInstanceOfResTypeIfHasPermissionToDeleteInstancesOfDefaultResourceType(){
 		// given
-		ResourceTypeEntity applicationResTypeEntity = new ResourceTypeEntity();
-		applicationResTypeEntity.setName(DefaultResourceTypeDefinition.APPLICATION.name());
-
 		when(sessionContext.isCallerInRole(SERVER_ADMIN)).thenReturn(true);
 		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
 		myRoles = new HashMap<>();
+		// Grant RESOURCE ALL on DEFAULT_ONLY for SERVER_ADMIN
 		PermissionEntity permission = new PermissionEntity();
 		permission.setValue(Permission.RESOURCE.name());
 		RestrictionEntity res = new RestrictionEntity();
@@ -166,7 +161,7 @@ public class PermissionServiceTest {
 		myRoles.put(SERVER_ADMIN, Arrays.asList(new RestrictionDTO(res)));
 		permissionService.rolesWithRestrictions = myRoles;
 		// when
-		boolean result = permissionService.hasPermissionToRemoveInstanceOfResType(applicationResTypeEntity);
+		boolean result = permissionService.hasPermission(Permission.RESOURCE, Action.DELETE, appResourceGroup);
 		// then
 		Assert.assertTrue(result);
 	}
@@ -210,26 +205,6 @@ public class PermissionServiceTest {
 		// then
 		Assert.assertTrue(result);
 	}
-
-    @Test
-    public void hasPermissionToDeleteResourceRelationWhenUserHasResourceUpdatePermissionAndResourceTypeIsNull() {
-        // given
-        ResourceEntity resourceWithoutResourceType = ResourceFactory.createNewResource("Orphan");
-
-        when(sessionContext.isCallerInRole(CONFIG_ADMIN)).thenReturn(true);
-		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
-        myRoles = new HashMap<>();
-		RestrictionEntity upd = new RestrictionEntity();
-		upd.setAction(Action.UPDATE);
-		myRoles.put(CONFIG_ADMIN, Arrays.asList(new RestrictionDTOBuilder().mockRestrictionDTO(Permission.RESOURCE, upd)));
-        permissionService.rolesWithRestrictions = myRoles;
-
-        // when
-        boolean result = permissionService.hasPermissionToDeleteRelation(resourceWithoutResourceType, new ContextEntity());
-
-        // then
-        Assert.assertFalse(result);
-    }
 
 	/**
 	 * Screen AppServer: remove node relation
@@ -442,28 +417,6 @@ public class PermissionServiceTest {
 
         // then
         Assert.assertTrue(canAdd);
-    }
-
-    @Test
-    public void hasNoPermissionToAddResourceRelationWhenResourceTypeIsNull() {
-        // given
-        //Create resource without resourceType
-        ResourceEntity resourceWithoutResourceType = ResourceFactory.createNewResource("Orphan");
-        //end Create resource without resourceType
-
-        when(sessionContext.isCallerInRole(CONFIG_ADMIN)).thenReturn(true);
-		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
-        myRoles = new HashMap<>();
-		RestrictionEntity res = new RestrictionEntity();
-		res.setAction(Action.ALL);
-		myRoles.put(CONFIG_ADMIN, Arrays.asList(new RestrictionDTOBuilder().mockRestrictionDTO(Permission.RESOURCE, res)));
-        permissionService.rolesWithRestrictions = myRoles;
-
-        // when
-        boolean canAdd = permissionService.hasPermissionToAddRelation(resourceWithoutResourceType, new ContextEntity());
-
-        // then
-        Assert.assertFalse(canAdd);
     }
 
     @Test
@@ -1117,19 +1070,21 @@ public class PermissionServiceTest {
 		resourceGroup.setResourceType(resourceType);
 		when(sessionContext.isCallerInRole(CONFIG_ADMIN)).thenReturn(true);
 		when(sessionContext.getCallerPrincipal()).thenReturn(principal);
+		// Grant PERMISSION_DELEGATION ALL
 		RestrictionEntity res = new RestrictionEntity();
 		res.setAction(Action.ALL);
 		PermissionEntity perm = new PermissionEntity();
 		perm.setValue(Permission.PERMISSION_DELEGATION.name());
 		res.setPermission(perm);
+		// Grant RESOURCE_PROPERTY_DECRYPT on resourceGroup 7
 		RestrictionEntity res2 = new RestrictionEntity();
 		res2.setResourceGroup(resourceGroup);
 		res2.setAction(Action.ALL);
 		PermissionEntity perm2 = new PermissionEntity();
 		perm2.setValue(Permission.RESOURCE_PROPERTY_DECRYPT.name());
 		res2.setPermission(perm2);
-		myRoles = new HashMap<>();
-		permissionService.rolesWithRestrictions = myRoles;
+
+		permissionService.rolesWithRestrictions = new HashMap<>();
 		when(permissionRepository.getUserWithRestrictions(anyString())).thenReturn(Arrays.asList(res, res2));
 
 		// when

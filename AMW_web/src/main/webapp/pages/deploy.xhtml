@@ -36,7 +36,7 @@
         <section id="content">
             <div class="container">
                 <h:panelGroup id="contentPanelGroup"
-                              rendered="#{securityDataProvider.hasPermissionOnAllContext('DEPLOYMENT', 'READ')}">
+                              rendered="#{securityDataProvider.hasPermissionToSeeDeployment()}">
                     <article>
                         <div class="well withHeight autoOverflow">
                             <ui:include src="components/customFilterComp.xhtml">

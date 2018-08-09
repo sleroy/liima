@@ -39,9 +39,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import static ch.puzzle.itc.mobiliar.business.security.entity.Action.ALL;
-import static ch.puzzle.itc.mobiliar.business.security.entity.Action.UPDATE;
-
 @Stateless
 public class PermissionService implements Serializable {
 
@@ -195,7 +192,7 @@ public class PermissionService implements Serializable {
      * @param permission
      */
     public boolean hasPermission(Permission permission) {
-        return hasPermission(permission, null, ALL, null, null);
+        return hasPermission(permission, null, Action.ALL, null, null);
     }
 
     /**
@@ -210,6 +207,10 @@ public class PermissionService implements Serializable {
 
     public boolean hasPermission(Permission permission, Action action, ResourceTypeEntity resourceType) {
         return hasPermission(permission, null, action, null, resourceType);
+    }
+
+    public boolean hasPermission(Permission permission, Action action, ResourceGroupEntity resoureGroup) {
+        return hasPermission(permission, null, action, resoureGroup, null);
     }
 
     /**
@@ -281,7 +282,6 @@ public class PermissionService implements Serializable {
         if (getCurrentUserName() == null) {
             return false;
         }
-
         for (String roleName : getRolesWithRestrictions().keySet()) {
             for(RestrictionDTO restrictionDTO : getRolesWithRestrictions().get(roleName)) {
                 if (matchRestriction(permissionName, action, context, resourceGroup, resourceType, restrictionDTO.getRestriction())) {
@@ -309,24 +309,44 @@ public class PermissionService implements Serializable {
         if (getCurrentUserName() == null) {
             return false;
         }
-
         for (RestrictionEntity restriction : getUserRestrictions(getCurrentUserName())) {
             if (matchRestriction(permissionName, action, context, resourceGroup, resourceType, restriction)) {
                 return true;
             }
         }
-
         return false;
     }
     
     private boolean matchRestriction(String permissionName, Action action, ContextEntity context, ResourceGroupEntity resourceGroup,
             ResourceTypeEntity resourceType, RestrictionEntity restriction) {
-        return restriction.getPermission().getValue().equals(permissionName)
-                && hasPermissionForAction(restriction, action) 
-                && hasPermissionForResourceGroup(restriction, resourceGroup)
-                && hasPermissionForResourceType(restriction, resourceType)
-                && hasPermissionForDefaultResourceType(restriction, resourceType)
-                && hasPermissionForContextOrForParent(restriction, context);
+        if(!restriction.getPermission().getValue().equals(permissionName)) {
+            return false;
+        }
+        if(Permission.valueOf(permissionName).isOld()) {
+            return true;
+        }
+        // new permissions
+        if(!hasPermissionForAction(restriction.getAction(), action)) {
+            return false;
+        }
+        if(!hasPermissionForContextOrForParent(restriction.getContext(), context)) {
+            return false;
+        }
+
+        // restriction group, type and category are mutually exclusive
+        // only groups allowed
+        if(restriction.getResourceGroup() != null) {
+            return hasPermissionForResourceGroup(restriction.getResourceGroup(), resourceGroup);
+        }
+        // only groups of resourceType or resourceTypes allowed
+        if(restriction.getResourceType() != null) {
+            if (hasPermissionForResourceGroup(restriction.getResourceType(), resourceGroup)) {
+                return true;
+            }
+            return hasPermissionForResourceType(restriction.getResourceType(), resourceType);
+        }
+        // only default non default or all resources allowed
+        return hasPermissionForGroupCategory(restriction.getResourceTypePermission(), resourceGroup);
     }
 
     /**
@@ -336,10 +356,10 @@ public class PermissionService implements Serializable {
      * @param restriction
      * @param context
      */
-    private boolean hasPermissionForContextOrForParent(RestrictionEntity restriction, ContextEntity context) {
-        return restriction.getContext() == null ||
-                (context != null && (restriction.getContext().getId().equals(context.getId()) ||
-                        (context.getParent() != null && restriction.getContext().getId().equals(context.getParent().getId()))));
+    private boolean hasPermissionForContextOrForParent(ContextEntity restrictionContext, ContextEntity context) {
+        return restrictionContext == null ||
+                (context != null && (restrictionContext.getId().equals(context.getId()) ||
+                        (context.getParent() != null && restrictionContext.getId().equals(context.getParent().getId()))));
     }
 
     /**
@@ -348,11 +368,10 @@ public class PermissionService implements Serializable {
      * @param restriction
      * @param action
      */
-    private boolean hasPermissionForAction(RestrictionEntity restriction, Action action) {
-        return action == null || restriction.getAction().equals(action) ||
-                restriction.getAction().equals(ALL);
+    private boolean hasPermissionForAction(Action restrictionAction, Action action) {
+        return action == null || restrictionAction.equals(action) ||
+                restrictionAction.equals(Action.ALL);
     }
-
 
     /**
      * Checks if a Restriction gives permission for a specific ResourceGroup
@@ -361,80 +380,52 @@ public class PermissionService implements Serializable {
      * @param restriction
      * @param resourceGroup
      */
-    private boolean hasPermissionForResourceGroup(RestrictionEntity restriction, ResourceGroupEntity resourceGroup) {
-        if (checkGroup(restriction.getResourceGroup(), resourceGroup)) {
-            return true;
-        }
-        if (checkGroupType(restriction.getResourceType(), resourceGroup.getResourceType())) {
-            return true;
-        }
-        return checkGroupCategory(restriction.getResourceTypePermission(), resourceGroup.getResourceType());
-
-    }
-
-    private boolean checkGroup(ResourceGroupEntity restrictionResourceGroup, ResourceGroupEntity resourceGroup) {
-        if (restrictionResourceGroup == null) {
+    private boolean hasPermissionForResourceGroup(ResourceGroupEntity restrictionResourceGroup, ResourceGroupEntity resourceGroup) {
+        if (resourceGroup == null) {
             return false;
         }
         return restrictionResourceGroup.getId().equals(resourceGroup.getId());
     }
 
-    private boolean checkGroupType(ResourceTypeEntity restrictionResourceType, ResourceTypeEntity groupResourceType) {
-        if (restrictionResourceType == null) {
+    private boolean hasPermissionForResourceGroup(ResourceTypeEntity restrictionResourceType, ResourceGroupEntity resourceGroup) {
+        if (resourceGroup == null) {
             return false;
         }
-        if (restrictionResourceType.getId().equals(groupResourceType.getId())) {
+        if (restrictionResourceType.getId().equals(resourceGroup.getResourceType().getId())) {
             return true;
         }
-        // check if resourceType restriction matches resourceGroup parent type
-        if (groupResourceType.getParentResourceType() == null) {
+        if (resourceGroup.getResourceType().getParentResourceType() == null) {
             return false;
         }
-        return restrictionResourceType.getId().equals(groupResourceType.getParentResourceType().getId());
+        return restrictionResourceType.getId().equals(resourceGroup.getResourceType().getParentResourceType() .getId());
     }
 
-    private boolean checkGroupCategory(ResourceTypePermission resourceTypeRestriction, ResourceTypeEntity groupResourceType) {
-        if (resourceTypeRestriction.equals(ResourceTypePermission.ANY)) {
-            return true;
-        }
-        // Only DefaultTypes are allowed
-        if (resourceTypeRestriction.equals(ResourceTypePermission.DEFAULT_ONLY)
-                && DefaultResourceTypeDefinition.contains(groupResourceType.getName())) {
-            return true;
-        }
-        // Only non DefaultTypes are allowed
-        return resourceTypeRestriction.equals(ResourceTypePermission.NON_DEFAULT_ONLY)
-                && !DefaultResourceTypeDefinition.contains(groupResourceType.getName());
-    }
-
-    /**
-     * Checks if a Restriction gives permission for a specific ResourceType
-     * No ResourceType on Restriction means all ResourceTypes are allowed
-     *
-     * @param restriction
-     * @param resourceType
-     */
-    private boolean hasPermissionForResourceType(RestrictionEntity restriction, ResourceTypeEntity resourceType) {
-        if (restriction.getResourceType() == null) {
-            return false;
-        }
+    private boolean hasPermissionForResourceType(ResourceTypeEntity restrictionResourceType, ResourceTypeEntity resourceType) {
         if (resourceType == null) {
             return false;
         }
-        if (restriction.getResourceType().getId().equals(resourceType.getId())) {
+        if (restrictionResourceType.getId().equals(resourceType.getId())) {
             return true;
         }
-        return resourceType.getParentResourceType() != null &&
-                restriction.getResourceType().getId().equals(resourceType.getParentResourceType().getId());
+        if (resourceType.getParentResourceType() == null) {
+            return false;
+        }
+        return restrictionResourceType.getId().equals(resourceType.getParentResourceType().getId());
     }
 
-    /**
-     * Check if the user can delete instances of ResourceTypes
-     *
-     * @param resourceType
-     */
-    public boolean hasPermissionToRemoveInstanceOfResType(ResourceTypeEntity resourceType) {
-        return hasPermission(Permission.RESOURCE, Action.DELETE, resourceType);
+    private boolean hasPermissionForGroupCategory(ResourceTypePermission resourceTypeRestriction, ResourceGroupEntity resourceGroup) {
+        if (resourceTypeRestriction.equals(ResourceTypePermission.ANY)) {
+            return true;
+        }
+        if (resourceGroup == null) {
+            return false;
+        }
+        // Only DefaultTypes are allowed
+        if (resourceTypeRestriction.equals(ResourceTypePermission.DEFAULT_ONLY)) {
+            return DefaultResourceTypeDefinition.contains(resourceGroup.getResourceType().getName());
+        }
+        // Only non DefaultTypes are allowed
+        return !DefaultResourceTypeDefinition.contains(resourceGroup.getResourceType().getName());
     }
 
     /**
@@ -453,24 +444,14 @@ public class PermissionService implements Serializable {
      * @param resourceTypeEntity
      */
     public boolean hasPermissionToAddRelatedResourceType(ResourceTypeEntity resourceTypeEntity) {
-        if (resourceTypeEntity != null) {
-            if (hasPermission(Permission.RESOURCETYPE, null, Action.UPDATE, null, resourceTypeEntity)) {
-                return true;
-            }
-        }
-        return false;
+        return hasPermission(Permission.RESOURCETYPE, null, Action.UPDATE, null, resourceTypeEntity);
     }
 
     /**
      * Checks if the user may delete a Resource relationship
      */
     public boolean hasPermissionToDeleteRelation(ResourceEntity resourceEntity, ContextEntity context) {
-        if (resourceEntity != null && resourceEntity.getResourceType() != null) {
-            if (hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), resourceEntity.getResourceType())) {
-                return true;
-            }
-        }
-        return false;
+        return hasPermission(Permission.RESOURCE, context, Action.UPDATE, resourceEntity.getResourceGroup(), resourceEntity.getResourceType());
     }
 
     /**

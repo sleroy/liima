@@ -126,7 +126,7 @@ public class ReleasingDataProvider implements Serializable {
 				Action.CREATE, currentSelectedResource, null);
 		canChangeRelease = permissionBoundary.hasPermission(Permission.RELEASE, Action.UPDATE)
 				&& foreignableBoundary.isModifiableByOwner(ForeignableOwner.getSystemOwner(), currentSelectedResource);
-		canRemoveRelease = permissionBoundary.hasPermissionToRemoveInstanceOfResType(currentSelectedResource.getResourceType())
+		canRemoveRelease = permissionBoundary.hasPermission(Permission.RESOURCE, null, Action.DELETE, resourceEntity, null)
 				&& foreignableBoundary.isModifiableByOwner(ForeignableOwner.getSystemOwner(), currentSelectedResource);
 
 	}

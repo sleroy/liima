@@ -279,10 +279,6 @@ public class PermissionBoundary implements Serializable {
         return permissionService.hasPermissionToAddRelatedResourceType(mergedResource);
     }
 
-    public boolean hasPermissionToRemoveInstanceOfResType(ResourceTypeEntity resourceType) {
-        return permissionService.hasPermissionToRemoveInstanceOfResType(resourceType);
-    }
-
     /**
      * Check that the user is config_admin, app_developer or shakedown_admin : shakedown_admin: can
      * modify(add/edit/delete) all testing templates config_admin: can modify(add/edit/delete) all templates
