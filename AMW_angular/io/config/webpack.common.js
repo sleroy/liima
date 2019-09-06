@@ -10,7 +10,6 @@ const helpers = require('./helpers');
  */
 const AssetsPlugin = require('assets-webpack-plugin');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
-const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlElementsPlugin = require('./html-elements-plugin');
@@ -142,7 +141,7 @@ module.exports = function (options) {
           test: /\.ts$/,
           use: [
             'awesome-typescript-loader',
-            'angular2-template-loader'
+          //  'angular2-template-loader'
           ],
           exclude: [/\.(spec|e2e)\.ts$/]
         },
@@ -164,11 +163,13 @@ module.exports = function (options) {
          * See: https://github.com/jtangelder/sass-loader
          * No css-loader?sourceMap so far because of https://github.com/webpack/style-loader/pull/96
          */
+        
         {
           test: /\.scss$/,
           //use: [ 'style-loader', 'css-loader', 'sass-loader' ], // creates style nodes from JS strings // translates CSS into CommonJS // compiles Sass to CSS
-          use: [ 'raw-loader', 'sass-loader?source-map-loader' ],
-          exclude: [helpers.root('src', 'styles')]
+           use: [ 'to-string-loader', 'raw-loader', 'sass-loader?sourceMap' ],
+          //use: [ 'raw-loader', 'sass-loader' ],
+         // exclude: [helpers.root('src', 'styles')]
         },
         // {
         //   test: /\.css$/,
@@ -182,11 +183,7 @@ module.exports = function (options) {
          *
          * See: https://github.com/webpack/raw-loader
          */
-        {
-          test: /\.html$/,
-          use: 'raw-loader',
-          exclude: [helpers.root('src/index.html')]
-        },
+       
 
         /* File loader for supporting images, for example, in CSS files. (defunct)
          */
@@ -263,9 +260,9 @@ module.exports = function (options) {
        * See: https://webpack.github.io/docs/list-of-plugins.html#commonschunkplugin
        * See: https://github.com/webpack/docs/wiki/optimization#multi-page-app
        */
-      new CommonsChunkPlugin({
-        name: helpers.reverse(['polyfills', 'vendor'])
-      }),
+      // new CommonsChunkPlugin({
+      //   name: helpers.reverse(['polyfills', 'vendor'])
+      // }),
 
       /**
        * Plugin: ContextReplacementPlugin
@@ -356,9 +353,9 @@ module.exports = function (options) {
        *
        * Dependencies: HtmlWebpackPlugin
        */
-      new HtmlElementsPlugin({
-        headTags: require('./head-config.common')
-      }),
+       new HtmlElementsPlugin({
+         headTags: require('./head-config.common')
+       }),
 
       /**
        * Plugin LoaderOptionsPlugin (experimental)
@@ -382,7 +379,17 @@ module.exports = function (options) {
       module: false,
       clearImmediate: false,
       setImmediate: false
-    }
+    },
+    optimization: {
+
+      //namedModules: true, // old NamedModulesPlugin()
+      splitChunks: {      // old CommonsChunkPlugin
+         chunks: "all"
+      },
+      runtimeChunk: true,
+     // concatenateModules: true // old ModuleConcatenationPlugin
+   }
+
 
   };
 }

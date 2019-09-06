@@ -20,7 +20,7 @@ HtmlElementsPlugin.prototype.apply = function(compiler) {
       }
 
 
-      callback(null, htmlPluginData);
+      //callback(null, htmlPluginData);
     });
   });
 

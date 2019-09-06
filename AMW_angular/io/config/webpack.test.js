@@ -24,7 +24,7 @@ const ENV = process.env.ENV = process.env.NODE_ENV = 'test';
  */
 module.exports = function (options) {
   return {
-
+    mode: "development",
     /**
      * Source map for Karma from the help of karma-sourcemap-loader &  karma-webpack
      *

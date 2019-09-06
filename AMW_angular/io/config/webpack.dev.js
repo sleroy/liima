@@ -35,7 +35,7 @@ const METADATA = webpackMerge(commonConfig({env: ENV}).metadata, {
  */
 module.exports = function (options) {
   return webpackMerge(commonConfig({env: ENV}), {
-
+    mode: 'development',
     /**
      * Developer tool to enhance debugging
      *
