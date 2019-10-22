@@ -20,7 +20,44 @@
 
 package ch.mobi.itc.mobiliar.rest.resources;
 
-import ch.mobi.itc.mobiliar.rest.dtos.*;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
+
+import ch.mobi.itc.mobiliar.rest.dtos.AppWithVersionDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.BatchJobInventoryDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.BatchResourceDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.BatchResourceRelationDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.DependencyDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceGroupDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceRelationDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceReleaseCopyDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceReleaseDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceTypeDTO;
 import ch.mobi.itc.mobiliar.rest.exceptions.ExceptionDto;
 import ch.puzzle.itc.mobiliar.business.database.control.Constants;
 import ch.puzzle.itc.mobiliar.business.deploy.boundary.DeploymentBoundary;
@@ -33,7 +70,11 @@ import ch.puzzle.itc.mobiliar.business.property.boundary.PropertyEditor;
 import ch.puzzle.itc.mobiliar.business.releasing.boundary.ReleaseLocator;
 import ch.puzzle.itc.mobiliar.business.releasing.control.ReleaseMgmtService;
 import ch.puzzle.itc.mobiliar.business.releasing.entity.ReleaseEntity;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.*;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.CopyResource;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceBoundary;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceGroupLocator;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceLocator;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceTypeLocator;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.control.CopyResourceResult;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.Resource;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
@@ -48,20 +89,10 @@ import ch.puzzle.itc.mobiliar.business.server.boundary.ServerView;
 import ch.puzzle.itc.mobiliar.business.server.entity.ServerTuple;
 import ch.puzzle.itc.mobiliar.business.utils.ValidationException;
 import ch.puzzle.itc.mobiliar.common.exception.AMWException;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.lang.StringUtils;
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import java.util.*;
-
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @RequestScoped
 @Path("/resources")
@@ -163,7 +194,7 @@ public class ResourcesRest {
     @Path("/name/{resourceId}")
     @GET
     @ApiOperation(value = "Get resource name by id")
-    public Response getResourceName(@PathParam("resourceId") Integer resourceId) {
+    public Response getResourceName(@PathParam("resourceId") Integer resourceId) throws ResourceNotFoundException {
         String resourceName = resourceBoundary.getResourceName(resourceId);
         return Response.status(Response.Status.OK).entity(resourceName).build();
     }
@@ -171,7 +202,7 @@ public class ResourcesRest {
     @Path("/{resourceGroupName}")
     @GET
     @ApiOperation(value = "Get a resource group")
-    public ResourceGroupDTO getResourceGroup(@PathParam("resourceGroupName") String resourceGroupName) {
+    public ResourceGroupDTO getResourceGroup(@PathParam("resourceGroupName") String resourceGroupName) throws ResourceNotFoundException {
         ResourceGroupEntity resourceGroupByName = resourceGroupLocator.getResourceGroupByName(resourceGroupName);
         List<ReleaseEntity> releases = releaseLocator.getReleasesForResourceGroup(resourceGroupByName);
         return new ResourceGroupDTO(resourceGroupByName, releases);
@@ -196,7 +227,7 @@ public class ResourcesRest {
     public ResourceDTO getExactOrClosestPastRelease(@PathParam("resourceGroupName") String resourceGroupName,
                                                     @PathParam("releaseName") String releaseName,
                                                     @QueryParam("env") @DefaultValue("Global") String environment,
-                                                    @QueryParam("type") String resourceType) throws ValidationException {
+                                                    @QueryParam("type") String resourceType) throws ValidationException, ResourceNotFoundException {
         ReleaseEntity release = resourceLocator.getExactOrClosestPastReleaseByGroupNameAndRelease(resourceGroupName, releaseName);
         return new ResourceDTO(release, resourceRelations.getResourceRelations(resourceGroupName,
                 release.getName(), resourceType), resourceProperties.getResourceProperties(resourceGroupName, release.getName(),
@@ -260,7 +291,7 @@ public class ResourcesRest {
     @ApiOperation(value = "Get application with version for a specific resourceGroup, release and context(s) - used by Angular")
     public Response getApplicationsWithVersionForRelease(@PathParam("resourceGroupId") Integer resourceGroupId,
                                                          @PathParam("releaseId") Integer releaseId,
-                                                         @QueryParam("context") List<Integer> contextIds) {
+                                                         @QueryParam("context") List<Integer> contextIds) throws ResourceNotFoundException {
 
         ResourceEntity appServer = resourceLocator.getExactOrClosestPastReleaseByGroupIdAndReleaseId(resourceGroupId, releaseId);
         if (appServer == null) {
@@ -279,12 +310,8 @@ public class ResourcesRest {
     @Path("/resourceGroups/{resourceGroupId}/releases/")
     @GET
     @ApiOperation(value = "Get deployable releases for a specific resourceGroup - used by Angular")
-    public Response getDeployableReleasesForResourceGroup(@PathParam("resourceGroupId") Integer resourceGroupId) {
-
+    public Response getDeployableReleasesForResourceGroup(@PathParam("resourceGroupId") Integer resourceGroupId) throws ResourceNotFoundException {
         ResourceGroupEntity group = resourceGroupLocator.getResourceGroupById(resourceGroupId);
-        if (group == null) {
-            return Response.status(NOT_FOUND).build();
-        }
         List<ResourceDTO> releases = new ArrayList<>();
         List<ReleaseEntity> deployableReleases = releaseMgmtService.getDeployableReleasesForResourceGroup(group);
         for (ReleaseEntity deployableRelease : deployableReleases) {
@@ -297,11 +324,8 @@ public class ResourcesRest {
     @Path("/resourceGroups/{resourceGroupId}/releases/mostRelevant/")
     @GET
     @ApiOperation(value = "Get most relevant release for a specific resourceGroup - used by Angular")
-    public Response getMostRelevantReleaseForResourceGroup(@PathParam("resourceGroupId") Integer resourceGroupId) {
+    public Response getMostRelevantReleaseForResourceGroup(@PathParam("resourceGroupId") Integer resourceGroupId) throws ResourceNotFoundException {
         ResourceGroupEntity group = resourceGroupLocator.getResourceGroupById(resourceGroupId);
-        if (group == null) {
-            return Response.status(NOT_FOUND).build();
-        }
         SortedSet<ReleaseEntity> deployableReleases = new TreeSet(releaseMgmtService.getDeployableReleasesForResourceGroup(group));
         ResourceDTO mostRelevant = new ResourceDTO(resourceDependencyResolverService.findMostRelevantRelease(deployableReleases, null));
         return Response.ok(mostRelevant).build();

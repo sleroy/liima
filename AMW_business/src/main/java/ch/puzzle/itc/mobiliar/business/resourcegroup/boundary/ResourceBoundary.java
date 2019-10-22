@@ -20,6 +20,15 @@
 
 package ch.puzzle.itc.mobiliar.business.resourcegroup.boundary;
 
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+
 import ch.puzzle.itc.mobiliar.business.domain.commons.CommonDomainService;
 import ch.puzzle.itc.mobiliar.business.environment.control.ContextDomainService;
 import ch.puzzle.itc.mobiliar.business.foreignable.control.ForeignableService;
@@ -32,22 +41,22 @@ import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceGroupReposi
 import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceRepository;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceTypeProvider;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceTypeRepository;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.*;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.Application;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ApplicationServer;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.Resource;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceFactory;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceTypeEntity;
 import ch.puzzle.itc.mobiliar.business.security.boundary.PermissionBoundary;
 import ch.puzzle.itc.mobiliar.business.security.entity.Action;
 import ch.puzzle.itc.mobiliar.business.security.entity.Permission;
 import ch.puzzle.itc.mobiliar.business.security.interceptor.HasPermission;
-import ch.puzzle.itc.mobiliar.common.exception.*;
+import ch.puzzle.itc.mobiliar.common.exception.ElementAlreadyExistsException;
+import ch.puzzle.itc.mobiliar.common.exception.NotAuthorizedException;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceTypeNotFoundException;
 import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import java.util.List;
-import java.util.logging.Logger;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -155,7 +164,7 @@ public class ResourceBoundary {
         ResourceGroupEntity anotherGroup = null;
         try {
             anotherGroup = resourceGroupRepository.getResourceGroupByName(newResourceName);
-        } catch (NoResultException nr) {
+        } catch (ResourceNotFoundException nr) {
             // nothing to do here
         }
         ResourceEntity resourceEntity = null;
@@ -294,10 +303,10 @@ public class ResourceBoundary {
         doRemoveResourceEntity(deletingOwner, resourceId);
     }
 
-    public String getResourceName(int resourceId) {
+    public String getResourceName(int resourceId) throws ResourceNotFoundException {
         ResourceEntity resourceEntity = resourceRepository.find(resourceId);
         if (resourceEntity == null) {
-            throw new NoResultException("No Resource with id " + resourceId);
+            throw new ResourceNotFoundException("No Resource with id " + resourceId);
         }
         return resourceEntity.getName();
     }

@@ -20,29 +20,23 @@
 
 package ch.mobi.itc.mobiliar.rest.resources;
 
+import static ch.puzzle.itc.mobiliar.common.util.ApplicationServerContainer.APPSERVERCONTAINER;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.CREATED;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import ch.mobi.itc.mobiliar.rest.dtos.*;
-import ch.puzzle.itc.mobiliar.business.deploy.boundary.DeploymentBoundary;
-import ch.puzzle.itc.mobiliar.business.environment.entity.ContextEntity;
-import ch.puzzle.itc.mobiliar.business.foreignable.entity.ForeignableOwner;
-import ch.puzzle.itc.mobiliar.business.foreignable.entity.ForeignableOwnerViolationException;
-import ch.puzzle.itc.mobiliar.business.releasing.boundary.ReleaseLocator;
-import ch.puzzle.itc.mobiliar.business.releasing.entity.ReleaseEntity;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.CopyResource;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceBoundary;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.control.CopyResourceResult;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.Resource;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
-import ch.puzzle.itc.mobiliar.common.exception.AMWException;
-import ch.puzzle.itc.mobiliar.common.exception.ElementAlreadyExistsException;
-import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
-import ch.puzzle.itc.mobiliar.common.exception.ResourceTypeNotFoundException;
-import ch.puzzle.itc.mobiliar.common.util.ApplicationServerContainer;
-import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
+import javax.ws.rs.core.Response;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,27 +46,34 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import ch.mobi.itc.mobiliar.rest.dtos.BatchJobInventoryDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.BatchResourceDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceGroupDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceReleaseCopyDTO;
+import ch.mobi.itc.mobiliar.rest.dtos.ResourceReleaseDTO;
+import ch.puzzle.itc.mobiliar.business.deploy.boundary.DeploymentBoundary;
+import ch.puzzle.itc.mobiliar.business.environment.entity.ContextEntity;
+import ch.puzzle.itc.mobiliar.business.foreignable.entity.ForeignableOwner;
+import ch.puzzle.itc.mobiliar.business.foreignable.entity.ForeignableOwnerViolationException;
+import ch.puzzle.itc.mobiliar.business.releasing.boundary.ReleaseLocator;
+import ch.puzzle.itc.mobiliar.business.releasing.entity.ReleaseEntity;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.CopyResource;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceBoundary;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceGroupLocator;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.boundary.ResourceLocator;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.control.CopyResourceResult;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.Resource;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
 import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceTypeEntity;
 import ch.puzzle.itc.mobiliar.business.server.boundary.ServerView;
 import ch.puzzle.itc.mobiliar.business.server.entity.ServerTuple;
 import ch.puzzle.itc.mobiliar.business.utils.ValidationException;
-
-import javax.ws.rs.core.Response;
-
-import static ch.puzzle.itc.mobiliar.common.util.ApplicationServerContainer.APPSERVERCONTAINER;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import ch.puzzle.itc.mobiliar.common.exception.AMWException;
+import ch.puzzle.itc.mobiliar.common.exception.ElementAlreadyExistsException;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceTypeNotFoundException;
+import ch.puzzle.itc.mobiliar.common.util.DefaultResourceTypeDefinition;
 
 public class ResourcesRestTest {
 
@@ -340,7 +341,7 @@ public class ResourcesRestTest {
     }
 
     @Test
-    public void shouldInvokeResourcesWithRightArgumentsOnGetClosestPastRelease() throws ValidationException {
+    public void shouldInvokeResourcesWithRightArgumentsOnGetClosestPastRelease() throws ValidationException, ResourceNotFoundException {
         // given
         String resourceGroupName = "TEST";
         String releaseName = "RL-17.10";
@@ -360,7 +361,7 @@ public class ResourcesRestTest {
     }
   
     @Test
-    public void shouldInvokeBoundaryWithRightArgumentsOnGetApplicationsWithVersionForRelease() {
+    public void shouldInvokeBoundaryWithRightArgumentsOnGetApplicationsWithVersionForRelease() throws ResourceNotFoundException {
         // given
         Integer resourceGroupId = 8;
         Integer releaseId = 9;

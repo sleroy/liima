@@ -20,21 +20,23 @@
 
 package ch.puzzle.itc.mobiliar.business.resourcegroup.boundary;
 
-import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceGroupRepository;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
-import ch.puzzle.itc.mobiliar.business.security.boundary.PermissionBoundary;
-import ch.puzzle.itc.mobiliar.business.security.entity.PermissionEntity;
-import ch.puzzle.itc.mobiliar.business.security.entity.RestrictionEntity;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+
+import ch.puzzle.itc.mobiliar.business.resourcegroup.control.ResourceGroupRepository;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
+import ch.puzzle.itc.mobiliar.business.security.boundary.PermissionBoundary;
+import ch.puzzle.itc.mobiliar.business.security.entity.PermissionEntity;
+import ch.puzzle.itc.mobiliar.business.security.entity.RestrictionEntity;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -59,11 +61,11 @@ public class ResourceGroupLocator {
 		return resourceGroupControl.getAllResourceGroupsByName();
 	}
 
-	public ResourceGroupEntity getResourceGroupByName(String name)  {
+	public ResourceGroupEntity getResourceGroupByName(String name) throws ResourceNotFoundException {
 		return resourceGroupControl.getResourceGroupByName(name);
 	}
 
-	public ResourceGroupEntity getResourceGroupById(Integer groupId)  {
+	public ResourceGroupEntity getResourceGroupById(Integer groupId) throws ResourceNotFoundException {
 		return resourceGroupControl.getResourceGroupById(groupId);
 	}
 	

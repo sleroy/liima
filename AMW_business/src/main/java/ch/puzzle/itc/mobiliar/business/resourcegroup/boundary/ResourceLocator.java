@@ -20,6 +20,18 @@
 
 package ch.puzzle.itc.mobiliar.business.resourcegroup.boundary;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.validation.constraints.NotNull;
+
 import ch.puzzle.itc.mobiliar.business.generator.control.extracted.ResourceDependencyResolverService;
 import ch.puzzle.itc.mobiliar.business.releasing.boundary.ReleaseLocator;
 import ch.puzzle.itc.mobiliar.business.releasing.entity.ReleaseEntity;
@@ -31,19 +43,9 @@ import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceTypeEntity;
 import ch.puzzle.itc.mobiliar.business.resourcerelation.entity.ConsumedResourceRelationEntity;
 import ch.puzzle.itc.mobiliar.business.utils.ValidationException;
 import ch.puzzle.itc.mobiliar.business.utils.ValidationHelper;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
 import ch.puzzle.itc.mobiliar.common.util.ConfigKey;
 import ch.puzzle.itc.mobiliar.common.util.ConfigurationService;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 @Stateless
 public class ResourceLocator {
@@ -96,7 +98,7 @@ public class ResourceLocator {
      * @throws ValidationException thrown if one of the arguments is either empty or null
      */
     public ReleaseEntity getExactOrClosestPastReleaseByGroupNameAndRelease(String name, String releaseName)
-            throws ValidationException {
+            throws ValidationException, ResourceNotFoundException {
         ValidationHelper.validateNotNullOrEmptyChecked(name, releaseName);
 
         ReleaseEntity release = releaseLocator.getReleaseByName(releaseName);
@@ -116,7 +118,7 @@ public class ResourceLocator {
      * @param releaseId release id
      * @return ResourceEntity
      */
-    public ResourceEntity getExactOrClosestPastReleaseByGroupIdAndReleaseId(@NotNull Integer groupId, @NotNull Integer releaseId) {
+    public ResourceEntity getExactOrClosestPastReleaseByGroupIdAndReleaseId(@NotNull Integer groupId, @NotNull Integer releaseId) throws ResourceNotFoundException {
 
         ReleaseEntity release = releaseLocator.getReleaseById(releaseId);
         ResourceGroupEntity resGroup = resourceGroupRepository.getResourceGroupById(groupId);

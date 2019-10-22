@@ -20,23 +20,29 @@
 
 package ch.puzzle.itc.mobiliar.business.resourcegroup.control;
 
-import ch.puzzle.itc.mobiliar.business.deploy.entity.DeploymentEntity;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
-import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
-import ch.puzzle.itc.mobiliar.common.util.ApplicationServerContainer;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceEntity;
+import ch.puzzle.itc.mobiliar.business.resourcegroup.entity.ResourceGroupEntity;
+import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
+import ch.puzzle.itc.mobiliar.common.util.ApplicationServerContainer;
 
 public class ResourceGroupRepository {
 
@@ -54,15 +60,29 @@ public class ResourceGroupRepository {
         return entityManager.createQuery("select r from ResourceGroupEntity r order by r.name", ResourceGroupEntity.class).getResultList();
     }
 
-    public ResourceGroupEntity getResourceGroupByName(String name){
+    public ResourceGroupEntity getResourceGroupByName(String name) throws ResourceNotFoundException {
         name = name.toLowerCase();
-        return entityManager.createQuery("select r from ResourceGroupEntity r where LOWER(r.name)=:name", ResourceGroupEntity.class).setParameter(
-                "name", name).getSingleResult();
+        List<ResourceGroupEntity> result = entityManager
+                .createQuery("select r from ResourceGroupEntity r where LOWER(r.name)=:name", ResourceGroupEntity.class)
+                .setParameter("name", name).getResultList();
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException("Resource with name not found: " + name);
+        }
+        return result.get(0);
     }
 
-    public ResourceGroupEntity getResourceGroupById(Integer groupId){
-        return entityManager.createQuery("select r from ResourceGroupEntity r where r.id=:groupId", ResourceGroupEntity.class).setParameter(
-                "groupId", groupId).getSingleResult();
+    public ResourceGroupEntity getResourceGroupById(Integer groupId) throws ResourceNotFoundException {
+        List<ResourceGroupEntity> result = entityManager
+                .createQuery("select r from ResourceGroupEntity r where r.id=:groupId", ResourceGroupEntity.class)
+                .setParameter("groupId", groupId).getResultList();
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException("Resource with groupId not found: " + groupId);
+        }
+        return result.get(0);
+    }
+
+    public ResourceGroupEntity find(Integer resourceGroupId) {
+        return entityManager.find(ResourceGroupEntity.class, resourceGroupId);
     }
 
     public List<ResourceGroupEntity> getResourceGroupsOrderedByName(Collection<Integer> resourceGroupIds){
@@ -175,10 +195,6 @@ public class ResourceGroupRepository {
         return result;
 
 	}
-
-    public ResourceGroupEntity find(Integer resourceGroupId) {
-        return entityManager.find(ResourceGroupEntity.class, resourceGroupId);
-    }
 
     /**
      * Removes a ResourceGroupEntity preserving its deployments

@@ -20,21 +20,40 @@
 
 package ch.mobi.itc.mobiliar.rest;
 
+import java.util.Set;
+
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
+
 import ch.mobi.itc.mobiliar.rest.Analyze.TestGenerationRest;
 import ch.mobi.itc.mobiliar.rest.auditview.AuditViewRest;
 import ch.mobi.itc.mobiliar.rest.deployments.DeploymentDtoCsvBodyWriter;
 import ch.mobi.itc.mobiliar.rest.deployments.DeploymentsRest;
 import ch.mobi.itc.mobiliar.rest.environments.EnvironmentsRest;
-import ch.mobi.itc.mobiliar.rest.exceptions.*;
+import ch.mobi.itc.mobiliar.rest.exceptions.ClientErrorExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.EJBExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.EJBTransactionRolledbackExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.ExceptionDtoBodyWriter;
+import ch.mobi.itc.mobiliar.rest.exceptions.IOExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.IllegalArgumentExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.IllegalStateExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.NoResultExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.NotAuthorizedExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.ResourceNotFoundExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.UncaughtExceptionMapper;
+import ch.mobi.itc.mobiliar.rest.exceptions.ValidationExceptionMapper;
 import ch.mobi.itc.mobiliar.rest.health.HealthCheck;
 import ch.mobi.itc.mobiliar.rest.permissions.RestrictionsRest;
-import ch.mobi.itc.mobiliar.rest.resources.*;
 import ch.mobi.itc.mobiliar.rest.releases.ReleasesRest;
+import ch.mobi.itc.mobiliar.rest.resources.HostNamesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourcePropertiesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourceRelationPropertiesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourceRelationTemplatesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourceRelationsRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourceTemplatesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ResourcesRest;
+import ch.mobi.itc.mobiliar.rest.resources.ServerTupleCSVBodyWriter;
 import ch.mobi.itc.mobiliar.rest.settings.SettingsRest;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.Set;
 
 @ApplicationPath("/resources/")
 public class RESTApplication extends Application {
@@ -69,6 +88,7 @@ public class RESTApplication extends Application {
         resources.add(IllegalArgumentExceptionMapper.class);
         resources.add(IOExceptionMapper.class);
         resources.add(NoResultExceptionMapper.class);
+        resources.add(ResourceNotFoundExceptionMapper.class);
         resources.add(NotAuthorizedExceptionMapper.class);
         resources.add(ValidationExceptionMapper.class);
         resources.add(UncaughtExceptionMapper.class);

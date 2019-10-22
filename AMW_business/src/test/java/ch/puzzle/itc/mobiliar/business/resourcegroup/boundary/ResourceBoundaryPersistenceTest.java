@@ -20,6 +20,28 @@
 
 package ch.puzzle.itc.mobiliar.business.resourcegroup.boundary;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.logging.Logger;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.stubbing.OngoingStubbing;
+
 import ch.puzzle.itc.mobiliar.business.domain.commons.CommonDomainService;
 import ch.puzzle.itc.mobiliar.business.environment.control.ContextDomainService;
 import ch.puzzle.itc.mobiliar.business.environment.entity.ContextEntity;
@@ -43,25 +65,6 @@ import ch.puzzle.itc.mobiliar.common.exception.ResourceNotDeletableException;
 import ch.puzzle.itc.mobiliar.common.exception.ResourceNotFoundException;
 import ch.puzzle.itc.mobiliar.common.exception.ResourceTypeNotFoundException;
 import ch.puzzle.itc.mobiliar.test.testrunner.PersistenceTestRunner;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.logging.Logger;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(PersistenceTestRunner.class)
 public class ResourceBoundaryPersistenceTest {
@@ -129,7 +132,7 @@ public class ResourceBoundaryPersistenceTest {
 
         // when
         when(resourceGroupRepository.loadUniqueGroupByNameAndType("app1", appType.getId())).thenReturn(null);
-        when(resourceGroupRepository.getResourceGroupByName("app1")).thenReturn(null);
+        OngoingStubbing<ResourceGroupEntity> getResourceGroupByNameStub = when(resourceGroupRepository.getResourceGroupByName("app1")).thenThrow(new ResourceNotFoundException("app1 not found"));
         Resource r1 = resourceBoundary.createNewResourceByName(ForeignableOwner.getSystemOwner(), "app1", appType.getId(),
                 release1.getId());
 
@@ -138,7 +141,7 @@ public class ResourceBoundaryPersistenceTest {
 
         // when
         when(resourceGroupRepository.loadUniqueGroupByNameAndType("app1", appType.getId())).thenReturn(r1.getEntity().getResourceGroup());
-        when(resourceGroupRepository.getResourceGroupByName("app1")).thenReturn(r1.getEntity().getResourceGroup());
+        getResourceGroupByNameStub.thenReturn(r1.getEntity().getResourceGroup());
         exception.expect(ElementAlreadyExistsException.class);
         Resource r2 = resourceBoundary.createNewResourceByName(ForeignableOwner.getSystemOwner(), "app1", appType.getId(),
                 release2.getId());

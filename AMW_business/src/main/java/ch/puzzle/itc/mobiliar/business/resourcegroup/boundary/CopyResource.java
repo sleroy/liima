@@ -137,7 +137,7 @@ public class CopyResource {
 	 * @throws AMWException
 	 */
 	public CopyResourceResult doCreateResourceRelease(String resourceGroupName, String targetReleaseName,
-		  String originReleaseName, ForeignableOwner actingOwner) throws ForeignableOwnerViolationException, AMWException {
+		  String originReleaseName, ForeignableOwner actingOwner) throws ForeignableOwnerViolationException, ResourceNotFoundException, AMWException {
 		ReleaseEntity targetRelease;
 		ReleaseEntity originRelease;
 		ResourceGroupEntity resourceGroup = resourceGroupRepository.getResourceGroupByName(resourceGroupName);
