@@ -7,6 +7,7 @@ import { AppState } from './app.service';
 import { SettingService } from './setting/setting.service';
 import { AppConfiguration } from './setting/app-configuration';
 import * as _ from 'lodash';
+import { setTheme } from 'ngx-bootstrap/utils';
 
 /*
  * App Component
@@ -26,9 +27,10 @@ export class AppComponent implements OnInit, AfterViewChecked {
   private logoutUrlKey: string = 'amw.logoutUrl';
 
   constructor(public appState: AppState,
-              private router: Router,
-              private cdRef: ChangeDetectorRef,
-              private settingService: SettingService) {
+    private router: Router,
+    private cdRef: ChangeDetectorRef,
+    private settingService: SettingService) {
+    setTheme('bs3');
   }
 
   ngOnInit() {
@@ -47,7 +49,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   private fetchLogoutUrl() {
     this.settingService.getAllAppSettings().subscribe(
-      /* happy path */ (r) => this.setLogoutUrl(r)
+      /* happy path */(r) => this.setLogoutUrl(r)
     );
   }
 
