@@ -70,7 +70,7 @@
     "ie-shim": "0.1.0",
     "jquery": "3.4.1",
     "lodash": "4.17.11",
-    "moment": "2.21.0",
+    "moment": "2.29.1",
     "resolve-url-loader": "2.3.0",
     "rxjs": "5.5.11",
     "zone.js": "0.8.26"
