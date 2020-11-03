@@ -64,9 +64,10 @@
   dependencies:
     tslib "^1.7.1"
 
-"@ng-select/ng-select@0.19.0":
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/@ng-select/ng-select/-/ng-select-0.19.0.tgz#75913aae7993a7b8b0c8321e3102776e96396666"
+"@ng-select/ng-select@0.36.2":
+  version "0.36.2"
+  resolved "https://registry.yarnpkg.com/@ng-select/ng-select/-/ng-select-0.36.2.tgz#bd1945a524c48015bd2503488cb1d4da31aa7349"
+  integrity sha1-vRlFpSTEgBW9JQNIjLHU2jGqc0k=
   dependencies:
     tslib "^1.7.1"
 
