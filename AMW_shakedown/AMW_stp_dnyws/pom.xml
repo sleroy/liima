@@ -10,7 +10,7 @@
 	<version>1.0.0</version>
 	<properties>
 		<mainClass>ch.puzzle.itc.mobiliar.stp.dynws.DynWS_STP</mainClass>
-		<cxf.version>3.1.7</cxf.version>
+		<cxf.version>3.3.8</cxf.version>
 		<version.dependency.maven.plugin>3.1.1</version.dependency.maven.plugin>
 		<version.assembly.maven.plugin>3.1.0</version.assembly.maven.plugin>
 	</properties>
@@ -37,7 +37,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
