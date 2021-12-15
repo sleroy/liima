@@ -329,7 +329,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>4.3.1.Final</version>
+                <version>6.0.19.Final</version>
                 <scope>provided</scope>
                 <exclusions>
                     <exclusion>
@@ -342,7 +342,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>4.3.11.Final</version>
+                <version>5.4.24.Final</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>dom4j</artifactId>
@@ -355,7 +355,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-envers</artifactId>
-                <version>4.3.11.Final</version>
+                <version>5.2.0.Final</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>dom4j</artifactId>
